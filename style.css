@@ -429,3 +429,44 @@ nav.bottom-nav button {
   font-weight: 700;
   line-height: 1.45;
 }
+
+/* Official Joetsu sorting dictionary shortcut. */
+.gomisaku-link {
+  display: grid;
+  grid-template-columns: 38px 1fr 18px;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #dfe7e1;
+  border-radius: 14px;
+  background: #f7faf8;
+  color: #25312a;
+  text-decoration: none;
+}
+.gomisaku-link:active { transform: translateY(1px); }
+.gomisaku-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #e7f3ea;
+  color: #2f7d4a;
+  font-size: 25px;
+  font-weight: 700;
+}
+.gomisaku-link strong,
+.gomisaku-link small { display: block; }
+.gomisaku-link strong { font-size: 14px; }
+.gomisaku-link small {
+  margin-top: 2px;
+  color: #68736c;
+  font-size: 10px;
+  font-weight: 500;
+}
+.gomisaku-arrow {
+  color: #78837c;
+  font-size: 24px;
+  line-height: 1;
+}
