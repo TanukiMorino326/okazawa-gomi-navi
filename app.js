@@ -232,7 +232,7 @@ function renderCalendar() {
     const type = collectionTypeFor(date);
     const cell = document.createElement("div");
     cell.className = `calendar-day${type ? ` ${type}` : ""}${year === now.getFullYear() && month === now.getMonth() && day === now.getDate() ? " today" : ""}`;
-    cell.innerHTML = `<span class="day-number">${day}</span>${type ? collectionIcon(type, "xs") : ""}${hasSpecialCollection(date) ? `<span class="special-badge">${currentLang === "ja" ? "特" : "S"}</span>` : ""}`;
+    cell.innerHTML = `<span class="day-number">${day}</span>${type ? `${collectionIcon(type, "xs")}<small class="calendar-short">${UI[currentLang].short[type]}</small>` : ""}${hasSpecialCollection(date) ? `<span class="special-badge">${currentLang === "ja" ? "特" : "S"}</span>` : ""}`;
     grid.appendChild(cell);
   }
   renderLegend();
