@@ -23,6 +23,7 @@ const UI = {
     tomorrowWeather: "明日",
     rainChance: "降水",
     sourceNote: "実際の収集日は年度カレンダーを優先",
+    outOfPeriod: "収集データ対象期間外です（2026年4月1日～2027年3月31日）",
     none: "収集なし",
     noFurther: "年度内の次回収集情報はありません",
     weekdays: ["月", "火", "水", "木", "金", "土", "日"],
@@ -44,6 +45,7 @@ const UI = {
     tomorrowWeather: "Tomorrow",
     rainChance: "Rain",
     sourceNote: "Official fiscal-year collection calendar takes priority.",
+    outOfPeriod: "Collection data is available for Apr 1, 2026 – Mar 31, 2027.",
     none: "No collection",
     noFurther: "No further collection data in this fiscal year",
     weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -80,6 +82,14 @@ function dateKey(date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+const SCHEDULE_START = "2026-04-01";
+const SCHEDULE_END = "2027-03-31";
+
+function isWithinSchedulePeriod(date) {
+  const key = dateKey(date);
+  return key >= SCHEDULE_START && key <= SCHEDULE_END;
 }
 
 function collectionTypeFor(date) {
@@ -132,6 +142,7 @@ function applyStaticLanguage() {
 function renderToday() {
   const now = new Date();
   const collection = collectionFor(now);
+  const inPeriod = isWithinSchedulePeriod(now);
   let dateLine = document.querySelector(".today-date");
   if (!dateLine) {
     dateLine = document.createElement("p");
@@ -142,9 +153,11 @@ function renderToday() {
 
   const text = document.querySelector(".today-card p");
   const todayType = collectionTypeFor(now);
-  text.innerHTML = collection
-    ? `<span class="collection-line">${collectionIcon(todayType, "lg")}<span class="collection-copy">${collection[currentLang]}<small>${collection[currentLang === "ja" ? "en" : "ja"]}</small></span></span>`
-    : `<span class="collection-line"><span class="collection-copy">${UI[currentLang].none}<small>${currentLang === "ja" ? "No collection" : "収集なし"}</small></span></span>`;
+  text.innerHTML = !inPeriod
+    ? `<span class="collection-line"><span class="collection-copy">${UI[currentLang].outOfPeriod}</span></span>`
+    : collection
+      ? `<span class="collection-line">${collectionIcon(todayType, "lg")}<span class="collection-copy">${collection[currentLang]}<small>${collection[currentLang === "ja" ? "en" : "ja"]}</small></span></span>`
+      : `<span class="collection-line"><span class="collection-copy">${UI[currentLang].none}<small>${currentLang === "ja" ? "No collection" : "収集なし"}</small></span></span>`;
   if (hasSpecialCollection(now)) {
     text.insertAdjacentHTML("beforeend",
       `<span class="special-note"><b>${currentLang === "ja" ? "特別収集" : "Special Collection"}</b>${SPECIAL_COLLECTION[currentLang]}</span>`
@@ -179,6 +192,7 @@ function renderWeek() {
     date.setDate(start.getDate() + i);
     const collection = collectionFor(date);
     const type = collectionTypeFor(date);
+    const inPeriod = isWithinSchedulePeriod(date);
     const row = document.createElement("div");
     row.className = `week-row${type ? ` ${type}` : ""}`;
     const weekday = currentLang === "en"
@@ -187,8 +201,8 @@ function renderWeek() {
     row.innerHTML = `
       <div class="week-date"><strong>${weekday}</strong><span>${date.getMonth() + 1}/${date.getDate()}</span></div>
       <div class="week-collection">
-        <div class="week-collection-main">${type ? collectionIcon(type, "sm") : '<span class="collection-icon-placeholder"></span>'}<strong>${collection ? collection[currentLang] : UI[currentLang].none}</strong></div>
-        <small>${collection ? collection[currentLang === "ja" ? "en" : "ja"] : (currentLang === "ja" ? "No collection" : "収集なし")}</small>
+        <div class="week-collection-main">${type ? collectionIcon(type, "sm") : '<span class="collection-icon-placeholder"></span>'}<strong>${!inPeriod ? UI[currentLang].outOfPeriod : (collection ? collection[currentLang] : UI[currentLang].none)}</strong></div>
+        <small>${!inPeriod ? "" : (collection ? collection[currentLang === "ja" ? "en" : "ja"] : (currentLang === "ja" ? "No collection" : "収集なし"))}</small>
       </div>
       ${hasSpecialCollection(date) ? `<div class="week-special"><b>${currentLang === "ja" ? "特別収集" : "Special"}</b> ${SPECIAL_COLLECTION[currentLang]}</div>` : ""}`;
     list.appendChild(row);
@@ -220,6 +234,10 @@ function renderCalendar() {
   const leading = (first.getDay() + 6) % 7;
   const grid = document.querySelector("#calendar-grid");
   grid.innerHTML = "";
+  const periodNote = document.querySelector("#calendar-period-note");
+  const monthOverlapsPeriod = dateKey(last) >= SCHEDULE_START && dateKey(first) <= SCHEDULE_END;
+  periodNote.hidden = monthOverlapsPeriod;
+  periodNote.textContent = UI[currentLang].outOfPeriod;
 
   for (let i = 0; i < leading; i += 1) {
     const blank = document.createElement("div");
