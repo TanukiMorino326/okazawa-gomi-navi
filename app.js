@@ -10,6 +10,8 @@ const UI = {
   ja: {
     area: "上越市 中郷区 C地区",
     todayTitle: "今日のごみ",
+    todayClosedTitle: "本日の回収締切",
+    deadlineNote: "朝8:30まで",
     nextTitle: "次の収集",
     weekButton: "今週の予定",
     homeTab: "今日", weekTab: "週間", calendarTab: "カレンダー",
@@ -35,6 +37,8 @@ const UI = {
   en: {
     area: "Nakago, Joetsu — Area C",
     todayTitle: "Today's Collection",
+    todayClosedTitle: "Today's collection has closed",
+    deadlineNote: "Put out by 8:30 AM",
     nextTitle: "Next Collection",
     weekButton: "This Week",
     homeTab: "Today", weekTab: "Week", calendarTab: "Calendar",
@@ -148,10 +152,18 @@ function applyStaticLanguage() {
   });
 }
 
+function isPastCollectionDeadline(date) {
+  return date.getHours() > 8 || (date.getHours() === 8 && date.getMinutes() >= 30);
+}
+
 function renderToday() {
   const now = new Date();
   const collection = collectionFor(now);
   const inPeriod = isWithinSchedulePeriod(now);
+  const closed = inPeriod && collection && isPastCollectionDeadline(now);
+  document.querySelector("#today-title").textContent = closed
+    ? UI[currentLang].todayClosedTitle
+    : UI[currentLang].todayTitle;
   let dateLine = document.querySelector(".today-date");
   if (!dateLine) {
     dateLine = document.createElement("p");
@@ -167,6 +179,11 @@ function renderToday() {
     : collection
       ? `<span class="collection-line">${collectionIcon(todayType, "lg")}<span class="collection-copy">${collection[currentLang]}<small>${collection[currentLang === "ja" ? "en" : "ja"]}</small></span></span>`
       : `<span class="collection-line"><span class="collection-copy">${UI[currentLang].none}<small>${currentLang === "ja" ? "No collection" : "収集なし"}</small></span></span>`;
+  if (inPeriod && collection) {
+    text.insertAdjacentHTML("beforeend",
+      `<span class="deadline-note">${UI[currentLang].deadlineNote}</span>`
+    );
+  }
   if (hasSpecialCollection(now)) {
     text.insertAdjacentHTML("beforeend",
       `<span class="special-note"><b>${currentLang === "ja" ? "特別収集" : "Special Collection"}</b>${SPECIAL_COLLECTION[currentLang]}</span>`
