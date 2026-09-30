@@ -209,7 +209,7 @@ function renderCalendar() {
   const year = calendarCursor.getFullYear();
   const month = calendarCursor.getMonth();
   document.querySelector("#calendar-month").textContent = currentLang === "en"
-    ? new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long" }).format(now)
+    ? new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long" }).format(new Date(year, month, 1, 12))
     : `${year}年${month + 1}月`;
 
   document.querySelector(".calendar-weekdays").innerHTML =
