@@ -186,3 +186,48 @@ nav button:active, .back-button:active { transform: translateY(1px); }
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+.special-note {
+  display: block;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgb(47 125 74 / 18%);
+  font-size: 13px;
+  font-weight: 600;
+}
+.special-note b {
+  display: inline-block;
+  margin-right: 7px;
+}
+.week-special {
+  grid-column: 1 / -1;
+  margin-top: -5px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: #fbe5e1;
+  font-size: 11px;
+}
+.special-badge {
+  position: absolute;
+  top: 4px;
+  right: 3px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fbe5e1;
+  font-size: 8px;
+  font-weight: 800;
+}
+.legend-special-mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 20px;
+  flex: 0 0 28px;
+  border-radius: 10px;
+  background: #fbe5e1;
+  font-size: 9px;
+  font-weight: 800;
+}
