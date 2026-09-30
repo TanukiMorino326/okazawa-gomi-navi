@@ -37,6 +37,11 @@ const UI = {
   }
 };
 
+const SPECIAL_COLLECTION = {
+  ja: "乾電池等／蛍光灯・電球",
+  en: "Batteries / Fluorescent Lamps / Light Bulbs"
+};
+
 let currentLang = localStorage.getItem("okazawa-gomi-lang") || "ja";
 
 function dateKey(date) {
@@ -48,6 +53,10 @@ function dateKey(date) {
 
 function collectionTypeFor(date) {
   return SCHEDULE_2026[dateKey(date)] || null;
+}
+
+function hasSpecialCollection(date) {
+  return SPECIAL_COLLECTION_2026.has(dateKey(date));
 }
 
 function collectionFor(date) {
@@ -104,6 +113,11 @@ function renderToday() {
   text.innerHTML = collection
     ? `${collection[currentLang]}<small>${collection[currentLang === "ja" ? "en" : "ja"]}</small>`
     : `${UI[currentLang].none}<small>${currentLang === "ja" ? "No collection" : "収集なし"}</small>`;
+  if (hasSpecialCollection(now)) {
+    text.insertAdjacentHTML("beforeend",
+      `<span class="special-note"><b>${currentLang === "ja" ? "特別収集" : "Special Collection"}</b>${SPECIAL_COLLECTION[currentLang]}</span>`
+    );
+  }
 
   const next = nextCollectionAfter(now);
   const nextText = document.querySelector(".next-card p");
@@ -142,7 +156,8 @@ function renderWeek() {
       <div class="week-collection">
         <strong>${collection ? collection[currentLang] : UI[currentLang].none}</strong>
         <small>${collection ? collection[currentLang === "ja" ? "en" : "ja"] : (currentLang === "ja" ? "No collection" : "収集なし")}</small>
-      </div>`;
+      </div>
+      ${hasSpecialCollection(date) ? `<div class="week-special"><b>${currentLang === "ja" ? "特別収集" : "Special"}</b> ${SPECIAL_COLLECTION[currentLang]}</div>` : ""}`;
     list.appendChild(row);
   }
 }
@@ -152,7 +167,8 @@ function renderLegend() {
   const order = ["burnable", "packaging", "cans", "paper", "nonburnable"];
   legend.innerHTML = order.map((type) =>
     `<div class="legend-item ${type}"><span class="legend-swatch"></span><span>${COLLECTIONS[type][currentLang]}</span></div>`
-  ).join("");
+  ).join("") +
+    `<div class="legend-item special"><span class="legend-special-mark">特</span><span>${SPECIAL_COLLECTION[currentLang]}</span></div>`;
 }
 
 function renderCalendar() {
@@ -183,7 +199,7 @@ function renderCalendar() {
     const type = collectionTypeFor(date);
     const cell = document.createElement("div");
     cell.className = `calendar-day${type ? ` ${type}` : ""}${day === now.getDate() ? " today" : ""}`;
-    cell.innerHTML = `<span class="day-number">${day}</span>${type ? `<small>${UI[currentLang].short[type]}</small>` : ""}`;
+    cell.innerHTML = `<span class="day-number">${day}</span>${type ? `<small>${UI[currentLang].short[type]}</small>` : ""}${hasSpecialCollection(date) ? `<span class="special-badge">${currentLang === "ja" ? "特" : "S"}</span>` : ""}`;
     grid.appendChild(cell);
   }
   renderLegend();
