@@ -10,7 +10,7 @@ const UI = {
   ja: {
     area: "上越市 中郷区 C地区",
     todayTitle: "今日のごみ",
-    todayClosedTitle: "本日の回収締切",
+    todayClosedTitle: "ごみ出し締切を過ぎました",
     deadlineNote: "朝8:30まで",
     nextTitle: "次の収集",
     weekButton: "今週の予定",
@@ -37,7 +37,7 @@ const UI = {
   en: {
     area: "Nakago, Joetsu — Area C",
     todayTitle: "Today's Collection",
-    todayClosedTitle: "Today's collection has closed",
+    todayClosedTitle: "Today's set-out deadline has passed",
     deadlineNote: "Put out by 8:30 AM",
     nextTitle: "Next Collection",
     weekButton: "This Week",
@@ -69,7 +69,7 @@ const SPECIAL_COLLECTION = {
 };
 
 let currentLang = localStorage.getItem("okazawa-gomi-lang") || "ja";
-let calendarCursor = new Date();
+let calendarCursor = tokyoNow();
 calendarCursor.setDate(1);
 calendarCursor.setHours(12, 0, 0, 0);
 
@@ -87,11 +87,25 @@ function collectionIcon(type, size = "md") {
   return `<span class="collection-icon collection-icon-${size} ${type}">${icons[type] || ""}</span>`;
 }
 
+const APP_TIME_ZONE = "Asia/Tokyo";
+
+function tokyoParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TIME_ZONE,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  }).formatToParts(date);
+  return Object.fromEntries(parts.filter((p) => p.type !== "literal").map((p) => [p.type, p.value]));
+}
+
+function tokyoNow() {
+  const p = tokyoParts();
+  return new Date(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour), Number(p.minute), 0, 0);
+}
+
 function dateKey(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const p = tokyoParts(date);
+  return `${p.year}-${p.month}-${p.day}`;
 }
 
 const SCHEDULE_START = "2026-04-01";
@@ -157,7 +171,7 @@ function isPastCollectionDeadline(date) {
 }
 
 function renderToday() {
-  const now = new Date();
+  const now = tokyoNow();
   const collection = collectionFor(now);
   const inPeriod = isWithinSchedulePeriod(now);
   const closed = inPeriod && collection && isPastCollectionDeadline(now);
@@ -206,7 +220,7 @@ function mondayOfWeek(date) {
 }
 
 function renderWeek() {
-  const start = mondayOfWeek(new Date());
+  const start = mondayOfWeek(tokyoNow());
   const end = new Date(start);
   end.setDate(end.getDate() + 6);
   document.querySelector("#week-range").textContent = `${formatDate(start)} – ${formatDate(end)}`;
@@ -245,7 +259,7 @@ function renderLegend() {
 }
 
 function renderCalendar() {
-  const now = new Date();
+  const now = tokyoNow();
   const year = calendarCursor.getFullYear();
   const month = calendarCursor.getMonth();
   document.querySelector("#calendar-month").textContent = currentLang === "en"
@@ -402,7 +416,7 @@ setInterval(() => {
   const nowKey = dateKey(new Date());
   if (nowKey !== renderedDateKey) {
     renderedDateKey = nowKey;
-    calendarCursor = new Date();
+    calendarCursor = tokyoNow();
     calendarCursor.setDate(1);
     calendarCursor.setHours(12, 0, 0, 0);
     refreshLanguage();
