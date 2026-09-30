@@ -17,6 +17,9 @@ const UI = {
     weekTitle: "今週の予定",
     calendarTitle: "カレンダー",
     weatherTitle: "岡沢の天気",
+    gomisakuTitle: "捨て方を調べる",
+    gomisakuSubtitle: "上越市ごみ分別辞典「ごみサク」",
+    gomisakuAria: "上越市ごみ分別辞典 ごみサクを開く",
     weatherLoading: "天気情報を読み込みます",
     weatherError: "天気情報を取得できませんでした",
     todayWeather: "今日",
@@ -39,6 +42,9 @@ const UI = {
     weekTitle: "This Week",
     calendarTitle: "Calendar",
     weatherTitle: "Okazawa Weather",
+    gomisakuTitle: "How to Sort & Dispose",
+    gomisakuSubtitle: "Joetsu Garbage Sorting Dictionary “Gomisaku”",
+    gomisakuAria: "Open Joetsu Garbage Sorting Dictionary Gomisaku",
     weatherLoading: "Loading weather",
     weatherError: "Weather data unavailable",
     todayWeather: "Today",
@@ -133,6 +139,9 @@ function applyStaticLanguage() {
   document.documentElement.lang = currentLang;
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     el.textContent = UI[currentLang][el.dataset.i18n];
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+    el.setAttribute("aria-label", UI[currentLang][el.dataset.i18nAria]);
   });
   document.querySelectorAll("[data-lang]").forEach((button) => {
     button.classList.toggle("active", button.dataset.lang === currentLang);
