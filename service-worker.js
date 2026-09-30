@@ -1,4 +1,4 @@
-const CACHE_NAME = "okazawa-gomi-navi-v7";
+const CACHE_NAME = "okazawa-gomi-navi-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
