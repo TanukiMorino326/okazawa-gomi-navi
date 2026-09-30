@@ -375,3 +375,22 @@ nav.bottom-nav button {
   .collection-icon-lg { width: 42px; height: 42px; }
   .collection-line { gap: 9px; }
 }
+
+/* Calendar: pair each icon with its short category label. */
+.calendar-short {
+  display: block;
+  margin: 1px auto 0;
+  padding: 0 1px;
+  font-size: 8px;
+  line-height: 1.05;
+  font-weight: 700;
+  color: #4d5952;
+  white-space: nowrap;
+  text-align: center;
+  letter-spacing: -0.04em;
+}
+.calendar-day .collection-icon-xs { margin-top: 1px; }
+@media (max-width: 360px) {
+  .calendar-short { font-size: 7px; }
+  .calendar-day .collection-icon-xs { width: 17px; height: 17px; }
+}
