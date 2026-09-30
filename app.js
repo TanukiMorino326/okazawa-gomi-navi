@@ -6,16 +6,16 @@ const COLLECTIONS = {
   paper: { ja: "新聞紙・雑誌類・段ボール", en: "Newspapers / Magazines / Cardboard" }
 };
 
-function collectionFor(date) {
-  const day = date.getDay();
-  const nth = Math.ceil(date.getDate() / 7);
+function dateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
-  if ([1, 3, 5].includes(day)) return COLLECTIONS.burnable;
-  if (day === 4) return COLLECTIONS.packaging;
-  if (day === 6 && [1, 3].includes(nth)) return COLLECTIONS.nonburnable;
-  if (day === 2 && [1, 3].includes(nth)) return COLLECTIONS.cans;
-  if (day === 2 && [2, 4].includes(nth)) return COLLECTIONS.paper;
-  return null;
+function collectionFor(date) {
+  const type = SCHEDULE_2026[dateKey(date)];
+  return type ? COLLECTIONS[type] : null;
 }
 
 function renderToday() {
