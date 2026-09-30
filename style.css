@@ -6,6 +6,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: #f6f7f5; }
 button { font: inherit; }
+[hidden] { display: none !important; }
 #app {
   width: min(100%, 390px);
   min-height: 100dvh;
@@ -43,7 +44,43 @@ nav button {
   font-weight: 700;
   cursor: pointer;
 }
-nav button:active { transform: translateY(1px); }
+nav button:active, .back-button:active { transform: translateY(1px); }
+.sub-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.back-button {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border: 1px solid #dfe4df;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 22px;
+}
+.week-list {
+  overflow: hidden;
+  border: 1px solid #e3e7e3;
+  border-radius: 16px;
+}
+.week-row {
+  display: grid;
+  grid-template-columns: 66px 1fr;
+  gap: 14px;
+  align-items: center;
+  min-height: 78px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e8ebe8;
+}
+.week-row:last-child { border-bottom: 0; }
+.week-date { display: grid; gap: 3px; }
+.week-date strong { font-size: 16px; }
+.week-date span { color: #6b756e; font-size: 13px; }
+.week-collection strong { display: block; font-size: 15px; }
+.week-collection small { display: block; margin-top: 4px; color: #68736c; font-size: 11px; }
+.source-note { margin: 14px 2px 0; color: #7a837d; font-size: 11px; }
 @media (min-width: 700px) {
   body { padding: 32px 0; }
   #app { min-height: 780px; border-radius: 24px; box-shadow: 0 12px 40px rgb(0 0 0 / 10%); }
