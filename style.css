@@ -231,3 +231,60 @@ nav button:active, .back-button:active { transform: translateY(1px); }
   font-size: 9px;
   font-weight: 800;
 }
+
+.weather-card {
+  margin: 14px 0;
+  padding: 15px 16px 12px;
+  border-radius: 14px;
+  background: #eaf3f8;
+}
+.weather-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.weather-heading h2 {
+  margin: 0;
+  font-size: 15px;
+}
+.weather-day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+.weather-day + .weather-day {
+  border-top: 1px solid rgb(32 66 86 / 12%);
+}
+.weather-day b,
+.weather-condition,
+.weather-values small {
+  display: block;
+}
+.weather-condition {
+  margin-top: 2px;
+  font-size: 12px;
+}
+.weather-values {
+  min-width: 92px;
+  text-align: right;
+}
+.weather-values strong {
+  display: block;
+  font-size: 15px;
+}
+.weather-values small,
+.weather-loading,
+.weather-source {
+  font-size: 10px;
+}
+.weather-loading {
+  margin: 8px 0;
+}
+.weather-source {
+  margin: 5px 0 0;
+  opacity: .62;
+  text-align: right;
+}
