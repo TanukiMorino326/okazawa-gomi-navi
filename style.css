@@ -164,3 +164,25 @@ nav button:active, .back-button:active { transform: translateY(1px); }
 .legend-item.cans .legend-swatch { background: #ddebf7; }
 .legend-item.paper .legend-swatch { background: #f2e5d5; }
 .legend-item.nonburnable .legend-swatch { background: #e7e7f5; }
+
+.language-switch {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  color: #8a938d;
+}
+.language-switch button {
+  border: 0;
+  padding: 6px 3px;
+  background: transparent;
+  color: #68736c;
+  cursor: pointer;
+}
+.language-switch button.active {
+  color: #1f2a24;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
