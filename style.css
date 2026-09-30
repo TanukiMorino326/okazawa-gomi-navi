@@ -138,3 +138,29 @@ nav button:active, .back-button:active { transform: translateY(1px); }
 .legend-item.cans { background: #ddebf7; }
 .legend-item.paper { background: #f2e5d5; }
 .legend-item.nonburnable { background: #e7e7f5; }
+
+/* Full-name vertical legend */
+.legend {
+  display: grid;
+  gap: 8px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  background: transparent !important;
+  font-size: 11px;
+}
+.legend-swatch {
+  width: 28px;
+  height: 20px;
+  flex: 0 0 28px;
+  border-radius: 6px;
+}
+.legend-item.burnable .legend-swatch { background: #ddf2e4; }
+.legend-item.packaging .legend-swatch { background: #fff1c9; }
+.legend-item.cans .legend-swatch { background: #ddebf7; }
+.legend-item.paper .legend-swatch { background: #f2e5d5; }
+.legend-item.nonburnable .legend-swatch { background: #e7e7f5; }
