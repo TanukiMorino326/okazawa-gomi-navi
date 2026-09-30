@@ -267,8 +267,8 @@ function renderWeather() {
 async function loadWeather() {
   const box = document.getElementById("weather-content");
   try {
-    // 岡沢周辺の固定地点。端末の位置情報は使用しない。
-    const url = "https://api.open-meteo.com/v1/forecast?latitude=36.98&longitude=138.19&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=2";
+    // 岡沢の固定代表地点。端末の位置情報は使用しない。
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=36.9849&longitude=138.2010&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=2";
     const response = await fetch(url);
     if (!response.ok) throw new Error("weather request failed");
     weatherData = await response.json();
