@@ -61,6 +61,20 @@ let calendarCursor = new Date();
 calendarCursor.setDate(1);
 calendarCursor.setHours(12, 0, 0, 0);
 
+
+function collectionIcon(type, size = "md") {
+  const common = 'viewBox="0 0 32 32" aria-hidden="true" focusable="false"';
+  const icons = {
+    burnable: `<svg ${common}><path d="M9 11h14l-1.2 16H10.2L9 11Z"/><path d="M12 11V8h8v3"/><path class="accent" d="M16 23c-2.2-1.3-3.3-3-2.6-4.8.5-1.2 1.5-1.8 2.1-3.4 2.7 1.9 4.4 4.1 3.3 6.3-.5 1-1.4 1.6-2.8 1.9Z"/></svg>`,
+    packaging: `<svg ${common}><rect x="5" y="15" width="22" height="11" rx="3"/><path d="M8 15l2-7h12l2 7M12 11h8"/><path class="accent" d="M10 20h12"/></svg>`,
+    cans: `<svg ${common}><rect x="5" y="8" width="9" height="18" rx="2"/><path d="M6 11h7M6 23h7"/><path d="M20 6h5v4l2 3v13h-9V13l2-3V6Z"/><path class="accent" d="M20 16h5"/></svg>`,
+    paper: `<svg ${common}><path d="M7 9l15-3 3 15-15 3L7 9Z"/><path d="M5 13l3 13 16-4"/><path class="accent" d="M11 11l8-2M12 15l8-2M13 19l8-2"/></svg>`,
+    nonburnable: `<svg ${common}><path d="M7 14h16l-1 11H8L7 14Z"/><path d="M10 14v-2h10v2M5 17h3M23 17h4"/><path class="accent" d="M13 9h6"/></svg>`,
+    special: `<svg ${common}><rect x="5" y="9" width="9" height="17" rx="2"/><path d="M8 6h3v3M8 14h3M9.5 12.5v3"/><path d="M21 7c-3 0-5 2.2-5 5 0 2 1 3.2 2.3 4.5V20h5.4v-3.5C25 15.2 26 14 26 12c0-2.8-2-5-5-5Z"/><path class="accent" d="M19 23h4M19 26h4"/></svg>`
+  };
+  return `<span class="collection-icon collection-icon-${size} ${type}">${icons[type] || ""}</span>`;
+}
+
 function dateKey(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -87,7 +101,7 @@ function nextCollectionAfter(date) {
   for (let i = 1; i <= 370; i += 1) {
     cursor.setDate(cursor.getDate() + 1);
     const collection = collectionFor(cursor);
-    if (collection) return { date: new Date(cursor), collection };
+    if (collection) return { date: new Date(cursor), collection, type: collectionTypeFor(cursor) };
   }
   return null;
 }
@@ -127,9 +141,10 @@ function renderToday() {
   dateLine.textContent = formatDate(now, true);
 
   const text = document.querySelector(".today-card p");
+  const todayType = collectionTypeFor(now);
   text.innerHTML = collection
-    ? `${collection[currentLang]}<small>${collection[currentLang === "ja" ? "en" : "ja"]}</small>`
-    : `${UI[currentLang].none}<small>${currentLang === "ja" ? "No collection" : "収集なし"}</small>`;
+    ? `<span class="collection-line">${collectionIcon(todayType, "lg")}<span class="collection-copy">${collection[currentLang]}<small>${collection[currentLang === "ja" ? "en" : "ja"]}</small></span></span>`
+    : `<span class="collection-line"><span class="collection-copy">${UI[currentLang].none}<small>${currentLang === "ja" ? "No collection" : "収集なし"}</small></span></span>`;
   if (hasSpecialCollection(now)) {
     text.insertAdjacentHTML("beforeend",
       `<span class="special-note"><b>${currentLang === "ja" ? "特別収集" : "Special Collection"}</b>${SPECIAL_COLLECTION[currentLang]}</span>`
@@ -139,7 +154,7 @@ function renderToday() {
   const next = nextCollectionAfter(now);
   const nextText = document.querySelector(".next-card p");
   nextText.innerHTML = next
-    ? `<span class="next-date">${formatDate(next.date)}</span>${next.collection[currentLang]}<small>${next.collection[currentLang === "ja" ? "en" : "ja"]}</small>`
+    ? `<span class="next-date">${formatDate(next.date)}</span><span class="collection-line">${collectionIcon(next.type, "md")}<span class="collection-copy">${next.collection[currentLang]}<small>${next.collection[currentLang === "ja" ? "en" : "ja"]}</small></span></span>`
     : UI[currentLang].noFurther;
 }
 
@@ -163,15 +178,16 @@ function renderWeek() {
     const date = new Date(start);
     date.setDate(start.getDate() + i);
     const collection = collectionFor(date);
+    const type = collectionTypeFor(date);
     const row = document.createElement("div");
-    row.className = "week-row";
+    row.className = `week-row${type ? ` ${type}` : ""}`;
     const weekday = currentLang === "en"
       ? new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date)
       : new Intl.DateTimeFormat("ja-JP", { weekday: "short" }).format(date);
     row.innerHTML = `
       <div class="week-date"><strong>${weekday}</strong><span>${date.getMonth() + 1}/${date.getDate()}</span></div>
       <div class="week-collection">
-        <strong>${collection ? collection[currentLang] : UI[currentLang].none}</strong>
+        <div class="week-collection-main">${type ? collectionIcon(type, "sm") : '<span class="collection-icon-placeholder"></span>'}<strong>${collection ? collection[currentLang] : UI[currentLang].none}</strong></div>
         <small>${collection ? collection[currentLang === "ja" ? "en" : "ja"] : (currentLang === "ja" ? "No collection" : "収集なし")}</small>
       </div>
       ${hasSpecialCollection(date) ? `<div class="week-special"><b>${currentLang === "ja" ? "特別収集" : "Special"}</b> ${SPECIAL_COLLECTION[currentLang]}</div>` : ""}`;
@@ -183,9 +199,9 @@ function renderLegend() {
   const legend = document.querySelector("#calendar-legend");
   const order = ["burnable", "packaging", "cans", "paper", "nonburnable"];
   legend.innerHTML = order.map((type) =>
-    `<div class="legend-item ${type}"><span class="legend-swatch"></span><span>${COLLECTIONS[type][currentLang]}</span></div>`
+    `<div class="legend-item ${type}">${collectionIcon(type, "sm")}<span>${COLLECTIONS[type][currentLang]}</span></div>`
   ).join("") +
-    `<div class="legend-item special"><span class="legend-special-mark">特</span><span>${SPECIAL_COLLECTION[currentLang]}</span></div>`;
+    `<div class="legend-item special">${collectionIcon("special", "sm")}<span>${SPECIAL_COLLECTION[currentLang]}</span></div>`;
 }
 
 function renderCalendar() {
@@ -216,7 +232,7 @@ function renderCalendar() {
     const type = collectionTypeFor(date);
     const cell = document.createElement("div");
     cell.className = `calendar-day${type ? ` ${type}` : ""}${year === now.getFullYear() && month === now.getMonth() && day === now.getDate() ? " today" : ""}`;
-    cell.innerHTML = `<span class="day-number">${day}</span>${type ? `<small>${UI[currentLang].short[type]}</small>` : ""}${hasSpecialCollection(date) ? `<span class="special-badge">${currentLang === "ja" ? "特" : "S"}</span>` : ""}`;
+    cell.innerHTML = `<span class="day-number">${day}</span>${type ? collectionIcon(type, "xs") : ""}${hasSpecialCollection(date) ? `<span class="special-badge">${currentLang === "ja" ? "特" : "S"}</span>` : ""}`;
     grid.appendChild(cell);
   }
   renderLegend();
