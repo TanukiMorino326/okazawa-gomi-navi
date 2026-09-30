@@ -42,6 +42,28 @@
       <div id="week-list" class="week-list"></div>
       <p class="source-note">実際の収集日は年度カレンダーを優先</p>
     </div>
+
+    <div id="calendar-view" class="view" hidden>
+      <header class="sub-header">
+        <button type="button" class="back-button" data-view="home" aria-label="ホームに戻る">←</button>
+        <div>
+          <h1>カレンダー</h1>
+          <p id="calendar-month"></p>
+        </div>
+      </header>
+      <div class="calendar-weekdays" aria-hidden="true">
+        <span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span>
+      </div>
+      <div id="calendar-grid" class="calendar-grid"></div>
+      <div class="legend" aria-label="ごみ種別の色分け">
+        <span class="legend-item burnable">燃・生</span>
+        <span class="legend-item packaging">容器</span>
+        <span class="legend-item cans">缶びん</span>
+        <span class="legend-item paper">古紙</span>
+        <span class="legend-item nonburnable">不燃</span>
+      </div>
+      <p class="source-note">実際の収集日は年度カレンダーを優先</p>
+    </div>
   </main>
   <script src="schedule-2026.js"></script>
   <script src="app.js"></script>
