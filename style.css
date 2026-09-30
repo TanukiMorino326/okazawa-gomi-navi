@@ -394,3 +394,25 @@ nav.bottom-nav button {
   .calendar-short { font-size: 7px; }
   .calendar-day .collection-icon-xs { width: 17px; height: 17px; }
 }
+
+/* Calendar: show regular + special collection together on shared dates. */
+.calendar-icon-pair {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1px;
+  margin: 1px auto 0;
+}
+.calendar-icon-pair .collection-icon-xs {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+.calendar-icon-pair.single .collection-icon-xs {
+  width: 19px;
+  height: 19px;
+}
+.calendar-day:has(.calendar-icon-pair) .calendar-short {
+  font-size: 7px;
+  letter-spacing: -0.07em;
+}
