@@ -396,5 +396,19 @@ document.querySelectorAll("[data-lang]").forEach((button) => {
 
 refreshLanguage();
 
+// Keep an already-open app in sync when the date changes at midnight.
+let renderedDateKey = dateKey(new Date());
+setInterval(() => {
+  const nowKey = dateKey(new Date());
+  if (nowKey !== renderedDateKey) {
+    renderedDateKey = nowKey;
+    calendarCursor = new Date();
+    calendarCursor.setDate(1);
+    calendarCursor.setHours(12, 0, 0, 0);
+    refreshLanguage();
+    if (!document.querySelector("#week-view").hidden) renderWeek();
+    if (!document.querySelector("#calendar-view").hidden) renderCalendar();
+  }
+}, 30000);
 
 loadWeather();
