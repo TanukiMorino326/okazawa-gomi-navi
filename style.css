@@ -416,3 +416,16 @@ nav.bottom-nav button {
   font-size: 7px;
   letter-spacing: -0.07em;
 }
+
+/* Fiscal-year data boundary notice. */
+.period-note {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border: 1px solid #ead9a6;
+  border-radius: 10px;
+  background: #fff8df;
+  color: #665b38;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+}
