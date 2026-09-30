@@ -95,13 +95,51 @@ function renderWeek() {
   }
 }
 
+function collectionTypeFor(date) {
+  return SCHEDULE_2026[dateKey(date)] || null;
+}
+
+function renderCalendar() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  document.querySelector("#calendar-month").textContent = `${year}年${month + 1}月`;
+
+  const first = new Date(year, month, 1, 12);
+  const last = new Date(year, month + 1, 0, 12);
+  const leading = (first.getDay() + 6) % 7;
+  const grid = document.querySelector("#calendar-grid");
+  grid.innerHTML = "";
+
+  for (let i = 0; i < leading; i += 1) {
+    const blank = document.createElement("div");
+    blank.className = "calendar-day blank";
+    grid.appendChild(blank);
+  }
+
+  for (let day = 1; day <= last.getDate(); day += 1) {
+    const date = new Date(year, month, day, 12);
+    const type = collectionTypeFor(date);
+    const cell = document.createElement("div");
+    cell.className = `calendar-day${type ? ` ${type}` : ""}${day === now.getDate() ? " today" : ""}`;
+    const labels = { burnable: "燃・生", packaging: "容器", nonburnable: "不燃", cans: "缶びん", paper: "古紙" };
+    cell.innerHTML = `<span class="day-number">${day}</span>${type ? `<small>${labels[type]}</small>` : ""}`;
+    grid.appendChild(cell);
+  }
+}
+
 function showView(view) {
   document.querySelector("#home-view").hidden = view !== "home";
   document.querySelector("#week-view").hidden = view !== "week";
+  document.querySelector("#calendar-view").hidden = view !== "calendar";
   if (view === "week") renderWeek();
+  if (view === "calendar") renderCalendar();
 }
 
 document.querySelector('[data-view="week"]').addEventListener("click", () => showView("week"));
-document.querySelector('[data-view="home"]').addEventListener("click", () => showView("home"));
+document.querySelector('[data-view="calendar"]').addEventListener("click", () => showView("calendar"));
+document.querySelectorAll('[data-view="home"]').forEach((button) => {
+  button.addEventListener("click", () => showView("home"));
+});
 
 renderToday();
