@@ -19,11 +19,15 @@ header p { margin: 0; color: #68736c; font-size: 14px; }
 section {
   padding: 22px 20px;
   border-radius: 18px;
-  background: #ddf2e4;
   box-shadow: 0 4px 14px rgb(0 0 0 / 6%);
 }
+.today-card { background: #ddf2e4; }
+.next-card { margin-top: 14px; background: #fff1c9; }
 section h2 { margin: 0 0 12px; font-size: 16px; }
 section p { margin: 0; font-size: 20px; font-weight: 700; }
+section small { display: block; margin-top: 7px; font-size: 13px; font-weight: 500; color: #536159; }
+.today-date { margin-top: 8px; font-weight: 700; color: #33443a; }
+.next-date { display: block; margin-bottom: 7px; font-size: 14px; font-weight: 700; color: #665b38; }
 nav {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -44,5 +48,3 @@ nav button:active { transform: translateY(1px); }
   body { padding: 32px 0; }
   #app { min-height: 780px; border-radius: 24px; box-shadow: 0 12px 40px rgb(0 0 0 / 10%); }
 }
-.today-date { margin-top: 8px; font-weight: 700; color: #33443a; }
-section small { display: block; margin-top: 7px; font-size: 13px; font-weight: 500; color: #536159; }
