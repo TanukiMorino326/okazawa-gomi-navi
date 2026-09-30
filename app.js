@@ -15,6 +15,12 @@ const UI = {
     calendarButton: "カレンダー",
     weekTitle: "今週の予定",
     calendarTitle: "カレンダー",
+    weatherTitle: "岡沢の天気",
+    weatherLoading: "天気情報を読み込みます",
+    weatherError: "天気情報を取得できませんでした",
+    todayWeather: "今日",
+    tomorrowWeather: "明日",
+    rainChance: "降水",
     sourceNote: "実際の収集日は年度カレンダーを優先",
     none: "収集なし",
     noFurther: "年度内の次回収集情報はありません",
@@ -29,6 +35,12 @@ const UI = {
     calendarButton: "Calendar",
     weekTitle: "This Week",
     calendarTitle: "Calendar",
+    weatherTitle: "Okazawa Weather",
+    weatherLoading: "Loading weather",
+    weatherError: "Weather data unavailable",
+    todayWeather: "Today",
+    tomorrowWeather: "Tomorrow",
+    rainChance: "Rain",
     sourceNote: "Official fiscal-year collection calendar takes priority.",
     none: "No collection",
     noFurther: "No further collection data in this fiscal year",
@@ -205,8 +217,70 @@ function renderCalendar() {
   renderLegend();
 }
 
+function weatherLabel(code, lang) {
+  if (code === 0) return lang === "ja" ? "晴れ" : "Clear";
+  if ([1, 2].includes(code)) return lang === "ja" ? "晴れ・くもり" : "Partly cloudy";
+  if (code === 3) return lang === "ja" ? "くもり" : "Cloudy";
+  if ([45, 48].includes(code)) return lang === "ja" ? "霧" : "Fog";
+  if ([51, 53, 55, 56, 57].includes(code)) return lang === "ja" ? "霧雨" : "Drizzle";
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return lang === "ja" ? "雨" : "Rain";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return lang === "ja" ? "雪" : "Snow";
+  if ([95, 96, 99].includes(code)) return lang === "ja" ? "雷雨" : "Thunderstorm";
+  return lang === "ja" ? "天気" : "Weather";
+}
+
+function weatherIcon(code) {
+  if (code === 0) return "☀️";
+  if ([1, 2].includes(code)) return "🌤️";
+  if (code === 3) return "☁️";
+  if ([45, 48].includes(code)) return "🌫️";
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return "🌧️";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "🌨️";
+  if ([95, 96, 99].includes(code)) return "⛈️";
+  return "🌡️";
+}
+
+let weatherData = null;
+
+function renderWeather() {
+  const box = document.getElementById("weather-content");
+  if (!box) return;
+  if (!weatherData) {
+    box.innerHTML = `<p class="weather-loading">${UI[currentLang].weatherLoading}</p>`;
+    return;
+  }
+  const d = weatherData.daily;
+  box.innerHTML = [0, 1].map((i) => `
+    <div class="weather-day">
+      <div>
+        <b>${i === 0 ? UI[currentLang].todayWeather : UI[currentLang].tomorrowWeather}</b>
+        <span class="weather-condition">${weatherIcon(d.weather_code[i])} ${weatherLabel(d.weather_code[i], currentLang)}</span>
+      </div>
+      <div class="weather-values">
+        <strong>${Math.round(d.temperature_2m_max[i])}° / ${Math.round(d.temperature_2m_min[i])}°</strong>
+        <small>${UI[currentLang].rainChance} ${d.precipitation_probability_max[i]}%</small>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function loadWeather() {
+  const box = document.getElementById("weather-content");
+  try {
+    // 岡沢周辺の固定地点。端末の位置情報は使用しない。
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=36.98&longitude=138.19&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=2";
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("weather request failed");
+    weatherData = await response.json();
+    renderWeather();
+  } catch (error) {
+    if (box) box.innerHTML = `<p class="weather-loading">${UI[currentLang].weatherError}</p>`;
+  }
+}
+
 function refreshLanguage() {
   applyStaticLanguage();
+  renderWeather();
   renderToday();
   if (!document.querySelector("#week-view").hidden) renderWeek();
   if (!document.querySelector("#calendar-view").hidden) renderCalendar();
@@ -234,3 +308,6 @@ document.querySelectorAll("[data-lang]").forEach((button) => {
 });
 
 refreshLanguage();
+
+
+loadWeather();
