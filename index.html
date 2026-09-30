@@ -40,7 +40,7 @@
         <p class="weather-source">Weather data: Open-Meteo</p>
       </section>
 
-      <nav aria-label="メインメニュー">
+      <nav class="home-actions" aria-label="メインメニュー">
         <button type="button" data-view="week" data-i18n="weekButton">今週の予定</button>
         <button type="button" data-view="calendar" data-i18n="calendarButton">カレンダー</button>
       </nav>
@@ -68,7 +68,7 @@
         <button type="button" class="back-button" data-view="home" aria-label="ホームに戻る">←</button>
         <div>
           <h1 data-i18n="calendarTitle">カレンダー</h1>
-          <p id="calendar-month"></p>
+          <div class="month-nav"><button type="button" id="prev-month" aria-label="前月">‹</button><p id="calendar-month"></p><button type="button" id="next-month" aria-label="翌月">›</button></div>
         </div>
       </header>
       <div class="calendar-weekdays" aria-hidden="true"></div>
@@ -77,6 +77,11 @@
       <p class="source-note" data-i18n="sourceNote">実際の収集日は年度カレンダーを優先</p>
     </div>
   </main>
+  <nav class="bottom-nav" aria-label="画面切替">
+    <button type="button" data-tab="home" class="active"><span class="nav-icon">⌂</span><span data-i18n="homeTab">今日</span></button>
+    <button type="button" data-tab="week"><span class="nav-icon">≡</span><span data-i18n="weekTab">週間</span></button>
+    <button type="button" data-tab="calendar"><span class="nav-icon">▦</span><span data-i18n="calendarTab">カレンダー</span></button>
+  </nav>
   <script src="schedule-2026.js"></script>
   <script src="app.js"></script>
   <script>
