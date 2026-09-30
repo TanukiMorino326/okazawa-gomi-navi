@@ -12,57 +12,54 @@
     <div id="home-view">
       <header>
         <h1>岡沢 ごみ出しナビ</h1>
-        <p>上越市 中郷区 C地区</p>
+        <p data-i18n="area">上越市 中郷区 C地区</p>
       </header>
 
       <section class="today-card" aria-labelledby="today-title">
-        <h2 id="today-title">今日のごみ</h2>
+        <h2 id="today-title" data-i18n="todayTitle">今日のごみ</h2>
         <p>収集情報を読み込みます</p>
       </section>
 
       <section class="next-card" aria-labelledby="next-title">
-        <h2 id="next-title">次の収集</h2>
+        <h2 id="next-title" data-i18n="nextTitle">次の収集</h2>
         <p>次回の収集情報を読み込みます</p>
       </section>
 
       <nav aria-label="メインメニュー">
-        <button type="button" data-view="week">今週の予定</button>
-        <button type="button" data-view="calendar">カレンダー</button>
+        <button type="button" data-view="week" data-i18n="weekButton">今週の予定</button>
+        <button type="button" data-view="calendar" data-i18n="calendarButton">カレンダー</button>
       </nav>
+      <div class="language-switch" aria-label="Language">
+        <button type="button" data-lang="ja" class="active">日本語</button>
+        <span aria-hidden="true">｜</span>
+        <button type="button" data-lang="en">English</button>
+      </div>
     </div>
 
     <div id="week-view" class="view" hidden>
       <header class="sub-header">
         <button type="button" class="back-button" data-view="home" aria-label="ホームに戻る">←</button>
         <div>
-          <h1>今週の予定</h1>
+          <h1 data-i18n="weekTitle">今週の予定</h1>
           <p id="week-range"></p>
         </div>
       </header>
       <div id="week-list" class="week-list"></div>
-      <p class="source-note">実際の収集日は年度カレンダーを優先</p>
+      <p class="source-note" data-i18n="sourceNote">実際の収集日は年度カレンダーを優先</p>
     </div>
 
     <div id="calendar-view" class="view" hidden>
       <header class="sub-header">
         <button type="button" class="back-button" data-view="home" aria-label="ホームに戻る">←</button>
         <div>
-          <h1>カレンダー</h1>
+          <h1 data-i18n="calendarTitle">カレンダー</h1>
           <p id="calendar-month"></p>
         </div>
       </header>
-      <div class="calendar-weekdays" aria-hidden="true">
-        <span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span>
-      </div>
+      <div class="calendar-weekdays" aria-hidden="true"></div>
       <div id="calendar-grid" class="calendar-grid"></div>
-      <div class="legend" aria-label="ごみ種別の色分け">
-        <div class="legend-item burnable"><span class="legend-swatch"></span><span>燃やせるごみ・生ごみ</span></div>
-        <div class="legend-item packaging"><span class="legend-swatch"></span><span>容器包装</span></div>
-        <div class="legend-item cans"><span class="legend-swatch"></span><span>缶・びん・PETボトル</span></div>
-        <div class="legend-item paper"><span class="legend-swatch"></span><span>新聞紙・雑誌類・段ボール</span></div>
-        <div class="legend-item nonburnable"><span class="legend-swatch"></span><span>燃やせないごみ</span></div>
-      </div>
-      <p class="source-note">実際の収集日は年度カレンダーを優先</p>
+      <div id="calendar-legend" class="legend" aria-label="ごみ種別の色分け"></div>
+      <p class="source-note" data-i18n="sourceNote">実際の収集日は年度カレンダーを優先</p>
     </div>
   </main>
   <script src="schedule-2026.js"></script>
