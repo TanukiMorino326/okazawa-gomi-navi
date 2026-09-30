@@ -288,3 +288,19 @@ nav button:active, .back-button:active { transform: translateY(1px); }
   opacity: .62;
   text-align: right;
 }
+
+/* v0.2 visual polish */
+body { padding-bottom: 74px; }
+#app { padding-bottom: 96px; }
+.home-actions { margin-bottom: 4px; }
+.today-card { position: relative; overflow: hidden; border: 1px solid rgb(47 125 74 / 10%); }
+.today-card::after { content: "♻"; position: absolute; right: 16px; top: 12px; font-size: 42px; opacity: .10; }
+.next-card { border: 1px solid rgb(102 91 56 / 8%); }
+.month-nav { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.month-nav p { min-width: 110px; text-align: center; }
+.month-nav button { width: 34px; height: 30px; border: 1px solid #dfe4df; border-radius: 9px; background: #fff; font-size: 22px; line-height: 1; cursor: pointer; }
+.bottom-nav { position: fixed; z-index: 20; left: 50%; bottom: 0; transform: translateX(-50%); width: min(100%, 390px); height: 68px; margin: 0; padding: 7px 12px max(7px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; border-top: 1px solid #e3e7e3; background: rgb(255 255 255 / 96%); box-shadow: 0 -6px 20px rgb(0 0 0 / 5%); backdrop-filter: blur(10px); }
+.bottom-nav button { min-height: 50px; border: 0; border-radius: 12px; background: transparent; color: #748078; display: grid; place-items: center; align-content: center; gap: 1px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.bottom-nav button.active { background: #eef7f1; color: #2f7d4a; }
+.nav-icon { font-size: 21px; line-height: 22px; font-weight: 500; }
+@media (min-width: 700px) { .bottom-nav { bottom: 24px; border: 1px solid #e3e7e3; border-radius: 18px; } }
