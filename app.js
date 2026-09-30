@@ -201,7 +201,7 @@ function renderLegend() {
   legend.innerHTML = order.map((type) =>
     `<div class="legend-item ${type}">${collectionIcon(type, "sm")}<span>${COLLECTIONS[type][currentLang]}</span></div>`
   ).join("") +
-    `<div class="legend-item special">${collectionIcon("special", "sm")}<span>${SPECIAL_COLLECTION[currentLang]}</span></div>`;
+    `<div class="legend-item special">${collectionIcon("special", "sm")}<span>${currentLang === "ja" ? "㊕ " : "Ⓢ "}${SPECIAL_COLLECTION[currentLang]}</span></div>`;
 }
 
 function renderCalendar() {
@@ -232,7 +232,16 @@ function renderCalendar() {
     const type = collectionTypeFor(date);
     const cell = document.createElement("div");
     cell.className = `calendar-day${type ? ` ${type}` : ""}${year === now.getFullYear() && month === now.getMonth() && day === now.getDate() ? " today" : ""}`;
-    cell.innerHTML = `<span class="day-number">${day}</span>${type ? `${collectionIcon(type, "xs")}<small class="calendar-short">${UI[currentLang].short[type]}</small>` : ""}${hasSpecialCollection(date) ? `<span class="special-badge">${currentLang === "ja" ? "特" : "S"}</span>` : ""}`;
+    const special = hasSpecialCollection(date);
+    const iconHtml = type
+      ? (special
+          ? `<span class="calendar-icon-pair">${collectionIcon(type, "xs")}${collectionIcon("special", "xs")}</span>`
+          : collectionIcon(type, "xs"))
+      : (special ? `<span class="calendar-icon-pair single">${collectionIcon("special", "xs")}</span>` : "");
+    const shortHtml = type
+      ? `<small class="calendar-short">${UI[currentLang].short[type]}${special ? (currentLang === "ja" ? "＆㊕" : " & Ⓢ") : ""}</small>`
+      : (special ? `<small class="calendar-short">${currentLang === "ja" ? "㊕" : "Ⓢ"}</small>` : "");
+    cell.innerHTML = `<span class="day-number">${day}</span>${iconHtml}${shortHtml}`;
     grid.appendChild(cell);
   }
   renderLegend();
