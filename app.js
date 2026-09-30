@@ -12,6 +12,7 @@ const UI = {
     todayTitle: "今日のごみ",
     nextTitle: "次の収集",
     weekButton: "今週の予定",
+    homeTab: "今日", weekTab: "週間", calendarTab: "カレンダー",
     calendarButton: "カレンダー",
     weekTitle: "今週の予定",
     calendarTitle: "カレンダー",
@@ -32,6 +33,7 @@ const UI = {
     todayTitle: "Today's Collection",
     nextTitle: "Next Collection",
     weekButton: "This Week",
+    homeTab: "Today", weekTab: "Week", calendarTab: "Calendar",
     calendarButton: "Calendar",
     weekTitle: "This Week",
     calendarTitle: "Calendar",
@@ -55,6 +57,9 @@ const SPECIAL_COLLECTION = {
 };
 
 let currentLang = localStorage.getItem("okazawa-gomi-lang") || "ja";
+let calendarCursor = new Date();
+calendarCursor.setDate(1);
+calendarCursor.setHours(12, 0, 0, 0);
 
 function dateKey(date) {
   const year = date.getFullYear();
@@ -185,8 +190,8 @@ function renderLegend() {
 
 function renderCalendar() {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
   document.querySelector("#calendar-month").textContent = currentLang === "en"
     ? new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long" }).format(now)
     : `${year}年${month + 1}月`;
@@ -210,7 +215,7 @@ function renderCalendar() {
     const date = new Date(year, month, day, 12);
     const type = collectionTypeFor(date);
     const cell = document.createElement("div");
-    cell.className = `calendar-day${type ? ` ${type}` : ""}${day === now.getDate() ? " today" : ""}`;
+    cell.className = `calendar-day${type ? ` ${type}` : ""}${year === now.getFullYear() && month === now.getMonth() && day === now.getDate() ? " today" : ""}`;
     cell.innerHTML = `<span class="day-number">${day}</span>${type ? `<small>${UI[currentLang].short[type]}</small>` : ""}${hasSpecialCollection(date) ? `<span class="special-badge">${currentLang === "ja" ? "特" : "S"}</span>` : ""}`;
     grid.appendChild(cell);
   }
@@ -292,10 +297,23 @@ function showView(view) {
   document.querySelector("#calendar-view").hidden = view !== "calendar";
   if (view === "week") renderWeek();
   if (view === "calendar") renderCalendar();
+  document.querySelectorAll("[data-tab]").forEach((button) => button.classList.toggle("active", button.dataset.tab === view));
 }
 
 document.querySelector('[data-view="week"]').addEventListener("click", () => showView("week"));
 document.querySelector('[data-view="calendar"]').addEventListener("click", () => showView("calendar"));
+document.querySelectorAll("[data-tab]").forEach((button) => {
+  button.addEventListener("click", () => showView(button.dataset.tab));
+});
+document.getElementById("prev-month").addEventListener("click", () => {
+  calendarCursor.setMonth(calendarCursor.getMonth() - 1);
+  renderCalendar();
+});
+document.getElementById("next-month").addEventListener("click", () => {
+  calendarCursor.setMonth(calendarCursor.getMonth() + 1);
+  renderCalendar();
+});
+
 document.querySelectorAll('[data-view="home"]').forEach((button) => {
   button.addEventListener("click", () => showView("home"));
 });
