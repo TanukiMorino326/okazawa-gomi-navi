@@ -269,7 +269,8 @@ function renderWeek() {
     const type = collectionTypeFor(date);
     const inPeriod = isWithinSchedulePeriod(date);
     const row = document.createElement("div");
-    row.className = `week-row${type ? ` ${type}` : ""}`;
+    const isToday = dateKey(date) === dateKey(tokyoNow());
+    row.className = `week-row${type ? ` ${type}` : ""}${isToday ? " today" : ""}`;
     const weekday = currentLang === "en"
       ? new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date)
       : new Intl.DateTimeFormat("ja-JP", { weekday: "short" }).format(date);
