@@ -470,3 +470,38 @@ nav.bottom-nav button {
   font-size: 24px;
   line-height: 1;
 }
+
+
+/* Opt-in control for rare special-collection push alerts. */
+.push-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 13px 14px;
+  border: 1px solid #ead9dc;
+  border-radius: 14px;
+  background: #fff7f6;
+}
+.push-copy strong,
+.push-copy small { display: block; }
+.push-copy strong { font-size: 14px; }
+.push-copy small { margin-top: 3px; color: #68736c; font-size: 10px; line-height: 1.35; }
+#push-subscribe {
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid #d7b8bd;
+  border-radius: 10px;
+  background: #fff;
+  color: #78484f;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+#push-subscribe.enabled {
+  border-color: #b9d8c2;
+  background: #eef7f1;
+  color: #2f7d4a;
+}
+#push-subscribe:disabled { cursor: default; opacity: .78; }
