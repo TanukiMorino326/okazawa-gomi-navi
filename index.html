@@ -13,6 +13,17 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>岡沢 ごみ出しナビ</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "915d09a7-25bd-49f4-9121-823c9f9a9432",
+        serviceWorkerPath: "okazawa-gomi-navi/push/onesignal/OneSignalSDKWorker.js",
+        serviceWorkerParam: { scope: "/okazawa-gomi-navi/push/onesignal/" }
+      });
+    });
+  </script>
 </head>
 <body>
   <main id="app">
