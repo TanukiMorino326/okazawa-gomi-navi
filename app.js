@@ -19,6 +19,12 @@ const UI = {
     weekTitle: "今週の予定",
     calendarTitle: "カレンダー",
     weatherTitle: "岡沢の天気",
+    pushTitle: "㊕ 特別収集日の通知",
+    pushDescription: "前日にお知らせを受け取れます",
+    pushButton: "通知を受け取る",
+    pushEnabled: "通知ON",
+    pushDenied: "通知がブロックされています",
+    pushUnavailable: "この端末では通知を利用できません",
     gomisakuTitle: "捨て方を調べる",
     gomisakuSubtitle: "上越市ごみ分別辞典「ごみサク」",
     gomisakuAria: "上越市ごみ分別辞典 ごみサクを開く",
@@ -46,6 +52,12 @@ const UI = {
     weekTitle: "This Week",
     calendarTitle: "Calendar",
     weatherTitle: "Okazawa Weather",
+    pushTitle: "Ⓢ Special Collection Alerts",
+    pushDescription: "Get a reminder the day before",
+    pushButton: "Enable alerts",
+    pushEnabled: "Alerts ON",
+    pushDenied: "Notifications are blocked",
+    pushUnavailable: "Notifications are unavailable on this device",
     gomisakuTitle: "How to Sort & Dispose",
     gomisakuSubtitle: "Joetsu Garbage Sorting Dictionary “Gomisaku”",
     gomisakuAria: "Open Joetsu Garbage Sorting Dictionary Gomisaku",
@@ -368,6 +380,7 @@ async function loadWeather() {
 
 function refreshLanguage() {
   applyStaticLanguage();
+  refreshPushStatus();
   renderWeather();
   renderToday();
   if (!document.querySelector("#week-view").hidden) renderWeek();
@@ -395,6 +408,57 @@ document.getElementById("prev-month").addEventListener("click", () => {
 document.getElementById("next-month").addEventListener("click", () => {
   calendarCursor.setMonth(calendarCursor.getMonth() + 1);
   renderCalendar();
+});
+
+function withOneSignal(callback) {
+  if (!window.OneSignalDeferred) return;
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    try {
+      await callback(OneSignal);
+    } catch (error) {
+      console.warn("OneSignal operation failed:", error);
+    }
+  });
+}
+
+function refreshPushStatus() {
+  const button = document.getElementById("push-subscribe");
+  const status = document.getElementById("push-status");
+  if (!button || !status) return;
+
+  if (!("Notification" in window)) {
+    button.disabled = true;
+    button.textContent = UI[currentLang].pushUnavailable;
+    status.textContent = UI[currentLang].pushUnavailable;
+    return;
+  }
+
+  withOneSignal((OneSignal) => {
+    const optedIn = Boolean(OneSignal.User?.PushSubscription?.optedIn);
+    const permission = Notification.permission;
+    button.disabled = optedIn || permission === "denied";
+    button.textContent = optedIn
+      ? UI[currentLang].pushEnabled
+      : permission === "denied"
+        ? UI[currentLang].pushDenied
+        : UI[currentLang].pushButton;
+    status.textContent = optedIn
+      ? UI[currentLang].pushEnabled
+      : permission === "denied"
+        ? UI[currentLang].pushDenied
+        : UI[currentLang].pushDescription;
+    button.classList.toggle("enabled", optedIn);
+  });
+}
+
+document.getElementById("push-subscribe")?.addEventListener("click", () => {
+  withOneSignal(async (OneSignal) => {
+    await OneSignal.Notifications.requestPermission();
+    if (Notification.permission === "granted" && !OneSignal.User.PushSubscription.optedIn) {
+      await OneSignal.User.PushSubscription.optIn();
+    }
+    refreshPushStatus();
+  });
 });
 
 document.querySelectorAll('[data-view="home"]').forEach((button) => {
