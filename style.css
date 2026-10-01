@@ -505,3 +505,29 @@ nav.bottom-nav button {
   color: #2f7d4a;
 }
 #push-subscribe:disabled { cursor: default; opacity: .78; }
+
+
+/* Week navigation: previous / current / next week. */
+.week-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.week-nav button {
+  min-height: 38px;
+  padding: 7px 8px;
+  border: 1px solid #dfe4df;
+  border-radius: 10px;
+  background: #fff;
+  color: #33443a;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.week-nav button:disabled {
+  background: #eef7f1;
+  color: #2f7d4a;
+  cursor: default;
+  opacity: 1;
+}
