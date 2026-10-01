@@ -17,6 +17,9 @@ const UI = {
     homeTab: "今日", weekTab: "週間", calendarTab: "カレンダー",
     calendarButton: "カレンダー",
     weekTitle: "今週の予定",
+    previousWeek: "前週",
+    currentWeek: "今週",
+    nextWeek: "次週",
     calendarTitle: "カレンダー",
     weatherTitle: "岡沢の天気",
     pushTitle: "㊕ 特別収集日の通知",
@@ -50,6 +53,9 @@ const UI = {
     homeTab: "Today", weekTab: "Week", calendarTab: "Calendar",
     calendarButton: "Calendar",
     weekTitle: "This Week",
+    previousWeek: "Previous",
+    currentWeek: "This Week",
+    nextWeek: "Next",
     calendarTitle: "Calendar",
     weatherTitle: "Okazawa Weather",
     pushTitle: "Ⓢ Special Collection Alerts",
@@ -83,6 +89,7 @@ const SPECIAL_COLLECTION = {
 const APP_TIME_ZONE = "Asia/Tokyo";
 
 let currentLang = localStorage.getItem("okazawa-gomi-lang") || "ja";
+let weekOffset = 0;
 let calendarCursor = tokyoNow();
 calendarCursor.setDate(1);
 calendarCursor.setHours(12, 0, 0, 0);
@@ -233,9 +240,25 @@ function mondayOfWeek(date) {
 
 function renderWeek() {
   const start = mondayOfWeek(tokyoNow());
+  start.setDate(start.getDate() + (weekOffset * 7));
   const end = new Date(start);
   end.setDate(end.getDate() + 6);
   document.querySelector("#week-range").textContent = `${formatDate(start)} – ${formatDate(end)}`;
+  const prevButton = document.getElementById("prev-week");
+  const nextButton = document.getElementById("next-week");
+  const currentButton = document.getElementById("current-week");
+  if (prevButton) {
+    prevButton.textContent = `‹ ${UI[currentLang].previousWeek}`;
+    prevButton.disabled = weekOffset <= -1;
+  }
+  if (nextButton) {
+    nextButton.textContent = `${UI[currentLang].nextWeek} ›`;
+    nextButton.disabled = weekOffset >= 1;
+  }
+  if (currentButton) {
+    currentButton.textContent = UI[currentLang].currentWeek;
+    currentButton.disabled = weekOffset === 0;
+  }
 
   const list = document.querySelector("#week-list");
   list.innerHTML = "";
@@ -401,6 +424,22 @@ document.querySelector('[data-view="calendar"]').addEventListener("click", () =>
 document.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => showView(button.dataset.tab));
 });
+document.getElementById("prev-week")?.addEventListener("click", () => {
+  if (weekOffset > -1) {
+    weekOffset -= 1;
+    renderWeek();
+  }
+});
+document.getElementById("current-week")?.addEventListener("click", () => {
+  weekOffset = 0;
+  renderWeek();
+});
+document.getElementById("next-week")?.addEventListener("click", () => {
+  if (weekOffset < 1) {
+    weekOffset += 1;
+    renderWeek();
+  }
+});
 document.getElementById("prev-month").addEventListener("click", () => {
   calendarCursor.setMonth(calendarCursor.getMonth() - 1);
   renderCalendar();
@@ -480,6 +519,7 @@ setInterval(() => {
   const nowKey = dateKey(new Date());
   if (nowKey !== renderedDateKey) {
     renderedDateKey = nowKey;
+    weekOffset = 0;
     calendarCursor = tokyoNow();
     calendarCursor.setDate(1);
     calendarCursor.setHours(12, 0, 0, 0);
