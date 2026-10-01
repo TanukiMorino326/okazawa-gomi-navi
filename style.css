@@ -551,3 +551,21 @@ nav.bottom-nav button {
   font-weight: 800;
   letter-spacing: .04em;
 }
+
+
+/* Calendar header: center the month selector independently of the back button. */
+#calendar-view .sub-header {
+  position: relative;
+}
+#calendar-view .sub-header > div {
+  flex: 1;
+  min-width: 0;
+}
+#calendar-view .month-nav {
+  justify-content: center;
+  width: 100%;
+}
+#calendar-view #calendar-month {
+  min-width: 180px;
+  text-align: center;
+}
