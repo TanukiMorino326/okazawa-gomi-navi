@@ -68,6 +68,8 @@ const SPECIAL_COLLECTION = {
   en: "Batteries / Fluorescent Lamps / Light Bulbs"
 };
 
+const APP_TIME_ZONE = "Asia/Tokyo";
+
 let currentLang = localStorage.getItem("okazawa-gomi-lang") || "ja";
 let calendarCursor = tokyoNow();
 calendarCursor.setDate(1);
@@ -86,8 +88,6 @@ function collectionIcon(type, size = "md") {
   };
   return `<span class="collection-icon collection-icon-${size} ${type}">${icons[type] || ""}</span>`;
 }
-
-const APP_TIME_ZONE = "Asia/Tokyo";
 
 function tokyoParts(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", {
