@@ -461,6 +461,26 @@ function withOneSignal(callback) {
   });
 }
 
+function renderPushStatus(optedIn) {
+  const button = document.getElementById("push-subscribe");
+  const status = document.getElementById("push-status");
+  if (!button || !status) return;
+
+  const permission = Notification.permission;
+  button.disabled = optedIn || permission === "denied";
+  button.textContent = optedIn
+    ? UI[currentLang].pushEnabled
+    : permission === "denied"
+      ? UI[currentLang].pushDenied
+      : UI[currentLang].pushButton;
+  status.textContent = optedIn
+    ? UI[currentLang].pushEnabled
+    : permission === "denied"
+      ? UI[currentLang].pushDenied
+      : UI[currentLang].pushDescription;
+  button.classList.toggle("enabled", optedIn);
+}
+
 function refreshPushStatus() {
   const button = document.getElementById("push-subscribe");
   const status = document.getElementById("push-status");
@@ -474,22 +494,25 @@ function refreshPushStatus() {
   }
 
   withOneSignal((OneSignal) => {
-    const optedIn = Boolean(OneSignal.User?.PushSubscription?.optedIn);
-    const permission = Notification.permission;
-    button.disabled = optedIn || permission === "denied";
-    button.textContent = optedIn
-      ? UI[currentLang].pushEnabled
-      : permission === "denied"
-        ? UI[currentLang].pushDenied
-        : UI[currentLang].pushButton;
-    status.textContent = optedIn
-      ? UI[currentLang].pushEnabled
-      : permission === "denied"
-        ? UI[currentLang].pushDenied
-        : UI[currentLang].pushDescription;
-    button.classList.toggle("enabled", optedIn);
+    renderPushStatus(Boolean(OneSignal.User?.PushSubscription?.optedIn));
   });
 }
+
+// Keep the button synchronized with OneSignal after SDK initialization,
+// subscription restoration, opt-in/out, or browser-side subscription changes.
+withOneSignal((OneSignal) => {
+  const pushSubscription = OneSignal.User?.PushSubscription;
+  if (!pushSubscription?.addEventListener) return;
+
+  pushSubscription.addEventListener("change", (event) => {
+    const optedIn = Boolean(
+      event?.current?.optedIn ?? OneSignal.User?.PushSubscription?.optedIn
+    );
+    renderPushStatus(optedIn);
+  });
+
+  renderPushStatus(Boolean(pushSubscription.optedIn));
+});
 
 document.getElementById("push-subscribe")?.addEventListener("click", () => {
   withOneSignal(async (OneSignal) => {
