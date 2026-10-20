@@ -457,14 +457,15 @@ let pushBusy = false;
 let pushTimer = null;
 let pushDeadline = 0;
 let pushAwaitingOn = false;
+let pushAwaitingOff = false;
 let pushRecoveryRequired = false;
 let pushOperation = 0;
 let pushOperationDeadline = 0;
 let pushInitExpired = false;
 const PUSH_WAIT_MS = 15000;
 const PUSH_COPY = {
-  ja: { checking: "通知状態を確認中…", working: "通知を登録中…", retry: "通知状態を再確認", unknown: "通知状態を確認できません。再確認してください", error: "通知の処理に失敗しました。再確認してください", deniedHelp: "端末・ブラウザーの設定で通知を許可してから戻ってください" },
-  en: { checking: "Checking alerts…", working: "Enabling alerts…", retry: "Check alert status", unknown: "Could not confirm alerts. Please check again.", error: "Alert setup failed. Please check again.", deniedHelp: "Allow notifications in device/browser settings, then return here." }
+  ja: { checking: "通知状態を確認中…", working: "通知設定を変更中…", offButton: "通知をONにする", retry: "通知状態を再確認", unknown: "通知状態を確認できません。再確認してください", error: "通知の処理に失敗しました。再確認してください", deniedHelp: "端末・ブラウザーの設定で通知を許可してから戻ってください" },
+  en: { checking: "Checking alerts…", working: "Updating alerts…", offButton: "Turn alerts ON", retry: "Check alert status", unknown: "Could not confirm alerts. Please check again.", error: "Alert setup failed. Please check again.", deniedHelp: "Allow notifications in device/browser settings, then return here." }
 };
 
 function renderPushStatus(state = pushState) {
@@ -476,16 +477,17 @@ function renderPushStatus(state = pushState) {
 
   const ui = UI[currentLang];
   const copy = PUSH_COPY[currentLang];
-  const labels = { checking: copy.checking, working: copy.working, on: ui.pushEnabled,
-    off: ui.pushButton, denied: ui.pushDenied, unavailable: ui.pushUnavailable,
+  const labels = { checking: copy.checking, working: copy.working, on: (currentLang === "ja" ? "通知をOFFにする" : "Turn alerts OFF"),
+    off: copy.offButton, denied: ui.pushDenied, unavailable: ui.pushUnavailable,
     unknown: copy.retry, error: copy.retry,
     recovery: currentLang === "ja" ? "再読み込みして確認" : "Reload and check" };
-  button.disabled = pushBusy || ["checking", "working", "on", "denied", "unavailable"].includes(state);
+  button.disabled = pushBusy || ["checking", "working", "denied", "unavailable"].includes(state);
   button.textContent = ["unknown", "error"].includes(state)
     ? (!pushSDK ? (currentLang === "ja" ? "再読み込み" : "Reload")
       : (currentLang === "ja" ? "通知を登録・再確認" : "Enable and check alerts")) : labels[state];
   button.setAttribute("aria-busy", String(pushBusy || state === "checking"));
-  status.textContent = state === "off" ? ui.pushDescription
+  status.textContent = state === "on" ? ui.pushEnabled
+    : state === "off" ? ui.pushDescription
     : state === "unknown" ? copy.unknown : state === "error" ? copy.error
     : state === "denied" ? copy.deniedHelp : labels[state];
   if (state === "recovery") {
@@ -507,7 +509,7 @@ function readPushState() {
       subscription.optedIn === true && subscription.id && subscription.token) return "on";
   if (Notification.permission === "default") return "off";
   // Granted permission with missing registration details can be restoration in flight.
-  if (subscription.id && subscription.token && subscription.optedIn === false) return "off";
+  if (subscription.optedIn === false) return "off";
   return null;
 }
 
@@ -522,11 +524,13 @@ function syncPushStatus() {
     const state = readPushState();
     if (pushBusy) {
       renderPushStatus(state === "denied" ? state : "working");
-    } else if (state && !(state === "off" && pushAwaitingOn)) {
+    } else if (state && !(state === "off" && pushAwaitingOn) && !(state === "on" && pushAwaitingOff)) {
       pushAwaitingOn = false;
+      pushAwaitingOff = false;
       renderPushStatus(state);
     } else if (Date.now() >= pushDeadline) {
       pushAwaitingOn = false;
+      pushAwaitingOff = false;
       renderPushStatus("unknown");
     } else {
       renderPushStatus("checking");
@@ -555,6 +559,7 @@ function requirePushReload() {
   pushRecoveryRequired = true;
   pushBusy = false;
   pushAwaitingOn = false;
+  pushAwaitingOff = false;
   ++pushOperation; // Invalidate every continuation of the timed-out operation.
   clearTimeout(pushTimer);
   renderPushStatus("recovery");
@@ -602,7 +607,7 @@ document.getElementById("push-subscribe")?.addEventListener("click", async () =>
     return;
   }
   const state = readPushState();
-  if (state !== "off" && state !== null) {
+  if (state !== "off" && state !== "on" && state !== null) {
     recheckPushStatus();
     return;
   }
@@ -622,14 +627,20 @@ document.getElementById("push-subscribe")?.addEventListener("click", async () =>
     if (operation === pushOperation) requirePushReload();
   }, PUSH_WAIT_MS);
   try {
-    if (Notification.permission !== "granted") {
+    if (state !== "on" && Notification.permission !== "granted") {
       await pushSDK.Notifications.requestPermission();
       if (!isCurrentOperation()) return;
     }
-    if (Notification.permission === "granted") {
+    if (state === "on") {
+      await pushSDK.User.PushSubscription.optOut();
+      if (!isCurrentOperation()) return;
+      pushAwaitingOff = true;
+      pushAwaitingOn = false;
+    } else if (Notification.permission === "granted") {
       await pushSDK.User.PushSubscription.optIn();
       if (!isCurrentOperation()) return;
       pushAwaitingOn = true;
+      pushAwaitingOff = false;
     }
     pushBusy = false;
     recheckPushStatus(true);
