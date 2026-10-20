@@ -450,79 +450,204 @@ document.getElementById("next-month").addEventListener("click", () => {
   renderCalendar();
 });
 
-function withOneSignal(callback) {
-  if (!window.OneSignalDeferred) return;
-  window.OneSignalDeferred.push(async function(OneSignal) {
-    try {
-      await callback(OneSignal);
-    } catch (error) {
-      console.warn("OneSignal operation failed:", error);
-    }
-  });
-}
+// Do not persist an ON flag: confirm the SDK state in every session.
+let pushSDK = null;
+let pushState = "checking";
+let pushBusy = false;
+let pushTimer = null;
+let pushDeadline = 0;
+let pushAwaitingOn = false;
+let pushRecoveryRequired = false;
+let pushOperation = 0;
+let pushOperationDeadline = 0;
+let pushInitExpired = false;
+const PUSH_WAIT_MS = 15000;
+const PUSH_COPY = {
+  ja: { checking: "通知状態を確認中…", working: "通知を登録中…", retry: "通知状態を再確認", unknown: "通知状態を確認できません。再確認してください", error: "通知の処理に失敗しました。再確認してください", deniedHelp: "端末・ブラウザーの設定で通知を許可してから戻ってください" },
+  en: { checking: "Checking alerts…", working: "Enabling alerts…", retry: "Check alert status", unknown: "Could not confirm alerts. Please check again.", error: "Alert setup failed. Please check again.", deniedHelp: "Allow notifications in device/browser settings, then return here." }
+};
 
-function renderPushStatus(optedIn) {
+function renderPushStatus(state = pushState) {
+  if (pushRecoveryRequired) state = "recovery";
+  pushState = state;
   const button = document.getElementById("push-subscribe");
   const status = document.getElementById("push-status");
   if (!button || !status) return;
 
-  const permission = Notification.permission;
-  button.disabled = optedIn || permission === "denied";
-  button.textContent = optedIn
-    ? UI[currentLang].pushEnabled
-    : permission === "denied"
-      ? UI[currentLang].pushDenied
-      : UI[currentLang].pushButton;
-  status.textContent = optedIn
-    ? UI[currentLang].pushEnabled
-    : permission === "denied"
-      ? UI[currentLang].pushDenied
-      : UI[currentLang].pushDescription;
-  button.classList.toggle("enabled", optedIn);
+  const ui = UI[currentLang];
+  const copy = PUSH_COPY[currentLang];
+  const labels = { checking: copy.checking, working: copy.working, on: ui.pushEnabled,
+    off: ui.pushButton, denied: ui.pushDenied, unavailable: ui.pushUnavailable,
+    unknown: copy.retry, error: copy.retry,
+    recovery: currentLang === "ja" ? "再読み込みして確認" : "Reload and check" };
+  button.disabled = pushBusy || ["checking", "working", "on", "denied", "unavailable"].includes(state);
+  button.textContent = ["unknown", "error"].includes(state)
+    ? (!pushSDK ? (currentLang === "ja" ? "再読み込み" : "Reload")
+      : (currentLang === "ja" ? "通知を登録・再確認" : "Enable and check alerts")) : labels[state];
+  button.setAttribute("aria-busy", String(pushBusy || state === "checking"));
+  status.textContent = state === "off" ? ui.pushDescription
+    : state === "unknown" ? copy.unknown : state === "error" ? copy.error
+    : state === "denied" ? copy.deniedHelp : labels[state];
+  if (state === "recovery") {
+    status.textContent = currentLang === "ja"
+      ? "通知処理が時間内に完了しませんでした。再読み込みして状態を確認してください"
+      : "Alert setup timed out. Reload to check its current state.";
+  }
+  button.classList.toggle("enabled", state === "on");
+}
+
+function readPushState() {
+  if (!("Notification" in window)) return "unavailable";
+  if (Notification.permission === "denied") return "denied";
+  if (!pushSDK) return null;
+  if (!pushSDK.Notifications.isPushSupported()) return "unavailable";
+  const subscription = pushSDK.User?.PushSubscription;
+  if (!subscription) return null;
+  if (Notification.permission === "granted" && pushSDK.Notifications.permission === true &&
+      subscription.optedIn === true && subscription.id && subscription.token) return "on";
+  if (Notification.permission === "default") return "off";
+  // Granted permission with missing registration details can be restoration in flight.
+  if (subscription.id && subscription.token && subscription.optedIn === false) return "off";
+  return null;
+}
+
+function syncPushStatus() {
+  clearTimeout(pushTimer);
+  if (pushBusy && Date.now() >= pushOperationDeadline) requirePushReload();
+  if (pushRecoveryRequired) {
+    renderPushStatus("recovery");
+    return;
+  }
+  try {
+    const state = readPushState();
+    if (pushBusy) {
+      renderPushStatus(state === "denied" ? state : "working");
+    } else if (state && !(state === "off" && pushAwaitingOn)) {
+      pushAwaitingOn = false;
+      renderPushStatus(state);
+    } else if (Date.now() >= pushDeadline) {
+      pushAwaitingOn = false;
+      renderPushStatus("unknown");
+    } else {
+      renderPushStatus("checking");
+      pushTimer = setTimeout(syncPushStatus, 500);
+    }
+  } catch (error) {
+    renderPushStatus("error");
+  }
 }
 
 function refreshPushStatus() {
-  const button = document.getElementById("push-subscribe");
-  const status = document.getElementById("push-status");
-  if (!button || !status) return;
-
-  if (!("Notification" in window)) {
-    button.disabled = true;
-    button.textContent = UI[currentLang].pushUnavailable;
-    status.textContent = UI[currentLang].pushUnavailable;
-    return;
-  }
-
-  withOneSignal((OneSignal) => {
-    renderPushStatus(Boolean(OneSignal.User?.PushSubscription?.optedIn));
-  });
+  // A language change must preserve pending operations and retry messages.
+  renderPushStatus();
 }
 
-// Keep the button synchronized with OneSignal after SDK initialization,
-// subscription restoration, opt-in/out, or browser-side subscription changes.
-withOneSignal((OneSignal) => {
-  const pushSubscription = OneSignal.User?.PushSubscription;
-  if (!pushSubscription?.addEventListener) return;
+function recheckPushStatus(startNewCheck = false) {
+  // DOM events pass an event object; only explicit true starts a new deadline.
+  // Unresolved/expired checks retain their deadline despite repeated focus events.
+  if (startNewCheck === true || ["on", "off", "denied", "unavailable"].includes(pushState)) {
+    pushDeadline = Date.now() + PUSH_WAIT_MS;
+  }
+  syncPushStatus();
+}
 
-  pushSubscription.addEventListener("change", (event) => {
-    const optedIn = Boolean(
-      event?.current?.optedIn ?? OneSignal.User?.PushSubscription?.optedIn
-    );
-    renderPushStatus(optedIn);
-  });
+function requirePushReload() {
+  pushRecoveryRequired = true;
+  pushBusy = false;
+  pushAwaitingOn = false;
+  ++pushOperation; // Invalidate every continuation of the timed-out operation.
+  clearTimeout(pushTimer);
+  renderPushStatus("recovery");
+}
 
-  renderPushStatus(Boolean(pushSubscription.optedIn));
+// SDK script loading and init() share a fixed, event-independent deadline.
+const pushInitDeadline = Date.now() + PUSH_WAIT_MS;
+function expirePushInit() {
+  pushInitExpired = true;
+  if (!("Notification" in window) || Notification.permission === "denied") return;
+  requirePushReload();
+}
+const pushInitTimer = setTimeout(expirePushInit, PUSH_WAIT_MS);
+
+// Explicitly wait for init(), rather than relying on ordering of deferred callbacks.
+Promise.resolve(window.okazawaPushReady).then((sdk) => {
+  if (Date.now() >= pushInitDeadline) expirePushInit();
+  if (pushInitExpired) return;
+  clearTimeout(pushInitTimer);
+  if (!sdk) throw new Error("Push initialization unavailable");
+  pushSDK = sdk;
+  sdk.User.PushSubscription.addEventListener("change", recheckPushStatus);
+  sdk.Notifications.addEventListener("permissionChange", recheckPushStatus);
+  recheckPushStatus(true);
+}).catch(() => {
+  if (pushInitExpired) return;
+  clearTimeout(pushInitTimer);
+  clearTimeout(pushTimer);
+  renderPushStatus(!("Notification" in window) ? "unavailable"
+    : Notification.permission === "denied" ? "denied" : "error");
 });
+recheckPushStatus(true);
 
-document.getElementById("push-subscribe")?.addEventListener("click", () => {
-  withOneSignal(async (OneSignal) => {
-    await OneSignal.Notifications.requestPermission();
-    if (Notification.permission === "granted" && !OneSignal.User.PushSubscription.optedIn) {
-      await OneSignal.User.PushSubscription.optIn();
+document.getElementById("push-subscribe")?.addEventListener("click", async () => {
+  if (pushBusy && Date.now() >= pushOperationDeadline) requirePushReload();
+  if (pushRecoveryRequired) {
+    // Never start a second SDK operation alongside one that cannot be cancelled.
+    // Reload restores actual state; it does not automatically call optIn().
+    window.location.reload();
+    return;
+  }
+  if (pushBusy) return;
+  if (!pushSDK) {
+    window.location.reload();
+    return;
+  }
+  const state = readPushState();
+  if (state !== "off" && state !== null) {
+    recheckPushStatus();
+    return;
+  }
+  pushBusy = true;
+  const operation = ++pushOperation;
+  pushOperationDeadline = Date.now() + PUSH_WAIT_MS;
+  const isCurrentOperation = () => {
+    if (operation !== pushOperation) return false;
+    if (Date.now() >= pushOperationDeadline) {
+      requirePushReload();
+      return false;
     }
-    refreshPushStatus();
-  });
+    return true;
+  };
+  renderPushStatus("working");
+  const timeout = setTimeout(() => {
+    if (operation === pushOperation) requirePushReload();
+  }, PUSH_WAIT_MS);
+  try {
+    if (Notification.permission !== "granted") {
+      await pushSDK.Notifications.requestPermission();
+      if (!isCurrentOperation()) return;
+    }
+    if (Notification.permission === "granted") {
+      await pushSDK.User.PushSubscription.optIn();
+      if (!isCurrentOperation()) return;
+      pushAwaitingOn = true;
+    }
+    pushBusy = false;
+    recheckPushStatus(true);
+  } catch (error) {
+    if (!isCurrentOperation()) return;
+    pushBusy = false;
+    renderPushStatus(Notification.permission === "denied" ? "denied" : "error");
+  } finally {
+    clearTimeout(timeout);
+  }
 });
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") recheckPushStatus();
+});
+window.addEventListener("pageshow", recheckPushStatus);
+window.addEventListener("focus", recheckPushStatus);
+window.addEventListener("online", recheckPushStatus);
 
 document.querySelectorAll('[data-view="home"]').forEach((button) => {
   button.addEventListener("click", () => showView("home"));
