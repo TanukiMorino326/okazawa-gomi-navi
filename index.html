@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="ja">
-<head>
+<html lang="ja"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#2f7d4a">
-  <meta name="application-name" content="岡沢 ごみ出しナビ">
+  <meta name="theme-color" content="#171717">
+  <meta name="application-name" content="Okazawa Gomi">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="岡沢ごみナビ">
+  <meta name="apple-mobile-web-app-title" content="Okazawa Gomi">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <title>岡沢 ごみ出しナビ</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-okazawa-v1-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-okazawa-v1-180.png">
+  <title>Okazawa Gomi — ごみ収集日・分別ガイド</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="layout.css">
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -33,105 +33,45 @@
     // app.js attaches the visible error handler after the page has been parsed.
     window.okazawaPushReady.catch(() => {});
   </script>
-</head>
-<body>
+</head><body>
   <main id="app">
-    <div id="home-view">
-      <header>
-        <h1>岡沢 ごみ出しナビ</h1>
-        <p data-i18n="area">上越市 中郷区 C地区</p>
-      </header>
-
-      <section class="today-card" aria-labelledby="today-title">
-        <h2 id="today-title" data-i18n="todayTitle">今日のごみ</h2>
-        <p>収集情報を読み込みます</p>
-      </section>
-
-      <section class="next-card" aria-labelledby="next-title">
-        <h2 id="next-title" data-i18n="nextTitle">次の収集</h2>
-        <p>次回の収集情報を読み込みます</p>
-      </section>
-
-      <section class="weather-card" aria-live="polite">
-        <div class="weather-heading">
-          <h2 data-i18n="weatherTitle">岡沢の天気</h2>
-        </div>
-        <div id="weather-content">
-          <p class="weather-loading">天気情報を読み込みます</p>
-        </div>
-        <p class="weather-source">Weather data: Open-Meteo</p>
-      </section>
-
-      <nav class="home-actions" aria-label="メインメニュー">
-        <button type="button" data-view="week" data-i18n="weekButton">今週の予定</button>
-        <button type="button" data-view="calendar" data-i18n="calendarButton">カレンダー</button>
-      </nav>
-      <div class="push-card">
-        <div class="push-copy">
-          <strong data-i18n="pushTitle">㊕ 特別収集日の通知</strong>
-          <small id="push-status" aria-live="polite">通知状態を確認中…</small>
-        </div>
-        <button type="button" id="push-subscribe" disabled>通知状態を確認中…</button>
-      </div>
-      <a class="gomisaku-link" href="https://www.gomisaku.jp/0152/" target="_blank" rel="noopener noreferrer" data-i18n-aria="gomisakuAria" aria-label="上越市ごみ分別辞典 ごみサクを開く">
-        <span class="gomisaku-icon" aria-hidden="true">⌕</span>
-        <span><strong data-i18n="gomisakuTitle">捨て方を調べる</strong><small data-i18n="gomisakuSubtitle">上越市ごみ分別辞典「ごみサク」</small></span>
-        <span class="gomisaku-arrow" aria-hidden="true">›</span>
-      </a>
-      <div class="language-switch" aria-label="Language">
-        <button type="button" data-lang="ja" class="active">日本語</button>
-        <span aria-hidden="true">｜</span>
-        <button type="button" data-lang="en">English</button>
-      </div>
+    <header class="app-header"><div class="brand"><img src="icon-okazawa-v1-192.png" width="42" height="42" alt=""><div><h1>Okazawa Gomi</h1><p data-i18n="area">上越市 中郷区 C地区</p></div></div><div class="language-switch" data-i18n-aria="languageLabel" aria-label="表示言語"><button type="button" data-lang="ja" aria-pressed="true">日本語</button><button type="button" data-lang="en" aria-pressed="false">English</button></div></header>
+    <div id="home-view" class="view">
+      <div class="section-top"><h2 id="today-title" data-i18n="todayTitle">今日の収集</h2><time id="today-date" class="today-date"></time></div>
+      <section class="today-card" aria-labelledby="today-title"><div id="today-content"></div></section>
+      <section class="next-card" id="next-content"></section>
+      <button type="button" class="sort-home-button" data-view="sort"><span data-ui-icon="grid" aria-hidden="true"></span><span data-i18n="sortButton">分別ガイドを見る</span><span class="link-arrow" aria-hidden="true">›</span></button>
+      <section class="weather-card"><h2 data-i18n="weatherTitle">岡沢の天気</h2><div id="weather-content" aria-live="polite"><p class="weather-loading" data-i18n="weatherLoading">天気情報を読み込みます</p></div><p class="weather-source" data-i18n="weatherSource">天気情報：Open-Meteo</p></section>
+      <section class="push-card"><span class="push-icon" data-ui-icon="bell" aria-hidden="true"></span><div class="push-copy"><strong data-i18n="pushTitle">特別収集日の通知</strong><small id="push-status" aria-live="polite">通知状態を確認中…</small></div><button type="button" id="push-subscribe" disabled>通知状態を確認中…</button></section>
     </div>
-
     <div id="week-view" class="view" hidden>
-      <header class="sub-header">
-        <button type="button" class="back-button" data-view="home" aria-label="ホームに戻る">←</button>
-        <div>
-          <h1 data-i18n="weekTitle">今週の予定</h1>
-          <p id="week-range"></p>
-        </div>
-      </header>
-      <div class="week-nav" aria-label="週の切り替え">
-        <button type="button" id="prev-week">‹ 前週</button>
-        <button type="button" id="current-week" disabled>今週</button>
-        <button type="button" id="next-week">次週 ›</button>
-      </div>
-      <div id="week-list" class="week-list"></div>
-      <p class="source-note" data-i18n="sourceNote">実際の収集日は年度カレンダーを優先</p>
+      <header class="view-header"><h2 data-i18n="weekTitle">週間の収集</h2><p id="week-range"></p></header>
+      <div class="week-nav"><button type="button" id="prev-week" data-i18n-aria="previousWeek" aria-label="前の週"><span data-ui-icon="prev"></span></button><button type="button" id="current-week" data-i18n="currentWeek" disabled>今週</button><button type="button" id="next-week" data-i18n-aria="nextWeek" aria-label="次の週"><span data-ui-icon="next"></span></button></div>
+      <p class="week-deadline"><span data-ui-icon="clock" aria-hidden="true"></span><span data-i18n="collectionDays">収集日の朝8:30までに出してください</span></p>
+      <div id="week-list" class="week-list"></div><p class="source-note" data-i18n="sourceNote">実際の収集日は年度カレンダーを優先</p>
     </div>
-
     <div id="calendar-view" class="view" hidden>
-      <header class="sub-header">
-        <button type="button" class="back-button" data-view="home" aria-label="ホームに戻る">←</button>
-        <div>
-          <h1 data-i18n="calendarTitle">カレンダー</h1>
-          <div class="month-nav"><button type="button" id="prev-month" aria-label="前月">‹</button><p id="calendar-month"></p><button type="button" id="next-month" aria-label="翌月">›</button></div>
-        </div>
-      </header>
-      <div class="calendar-weekdays" aria-hidden="true"></div>
-      <div id="calendar-period-note" class="period-note" hidden></div>
-      <div id="calendar-grid" class="calendar-grid"></div>
-      <div id="calendar-legend" class="legend" aria-label="ごみ種別の色分け"></div>
-      <p class="source-note" data-i18n="sourceNote">実際の収集日は年度カレンダーを優先</p>
+      <h2 class="calendar-title" data-i18n="calendarTitle">収集カレンダー</h2>
+      <div class="month-nav"><button type="button" id="prev-month" data-i18n-aria="previousMonth" aria-label="前の月"><span data-ui-icon="prev"></span></button><strong id="calendar-month"></strong><button type="button" id="next-month" data-i18n-aria="nextMonth" aria-label="次の月"><span data-ui-icon="next"></span></button></div>
+      <div class="month-caption"><span data-i18n="calendarHint">日付をタップして収集内容を確認</span><button type="button" id="calendar-today" data-i18n="todayJump">今日へ</button></div>
+      <div id="calendar-period-note" class="period-note" role="status" hidden></div>
+      <div class="calendar-weekdays"></div><div id="calendar-grid" class="calendar-grid month-grid" role="group" data-i18n-aria="calendarTitle" aria-label="収集カレンダー" aria-describedby="calendar-help"></div>
+      <p id="calendar-help" class="visually-hidden" data-i18n="calendarHelp">矢印キーでも日付を選べます</p>
+      <div class="calendar-keys"><span><i class="key-today" aria-hidden="true"></i><span data-i18n="todayMark">今日</span></span><span><i class="key-selected" aria-hidden="true"></i><span data-i18n="selected">選択中</span></span><span><b class="key-special" aria-hidden="true">+</b><span data-i18n="special">特別収集</span></span></div>
+      <section id="calendar-detail" class="day-details" aria-live="polite" aria-atomic="true"></section>
+      <details class="calendar-guide"><summary data-i18n="guide">色・アイコンの見方</summary><div id="calendar-legend" class="legend"></div></details><p class="source-note" data-i18n="sourceNote">実際の収集日は年度カレンダーを優先</p>
     </div>
+    <div id="sort-view" class="view" hidden><header class="sub-header"><button type="button" class="back-button" data-view="home" data-i18n-aria="backHome" aria-label="ホームに戻る">←</button><div><h2 id="sort-heading">分別ガイド</h2><p id="sort-intro">分け方・出し方・使う袋を確認</p></div></header><div id="sort-content"></div></div>
   </main>
-  <nav class="bottom-nav" aria-label="画面切替">
-    <button type="button" data-tab="home" class="active"><span class="nav-icon">⌂</span><span data-i18n="homeTab">今日</span></button>
-    <button type="button" data-tab="week"><span class="nav-icon">≡</span><span data-i18n="weekTab">週間</span></button>
-    <button type="button" data-tab="calendar"><span class="nav-icon">▦</span><span data-i18n="calendarTab">カレンダー</span></button>
+  <nav class="bottom-nav" data-i18n-aria="navLabel" aria-label="画面切替">
+    <button type="button" data-tab="home" class="active" aria-current="page"><span data-ui-icon="home" aria-hidden="true"></span><span data-i18n="homeTab">今日</span></button><button type="button" data-tab="week"><span data-ui-icon="week" aria-hidden="true"></span><span data-i18n="weekTab">週間</span></button><button type="button" data-tab="calendar"><span data-ui-icon="calendar" aria-hidden="true"></span><span data-i18n="calendarTab">カレンダー</span></button><button type="button" data-tab="sort"><span data-ui-icon="grid" aria-hidden="true"></span><span data-i18n="sortTab">分別</span></button>
   </nav>
-  <script src="schedule-2026.js"></script>
-  <script src="app.js"></script>
+  <script src="schedule-2026.js"></script><script src="sort-data.js"></script><script src="sort.js"></script><script src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-          console.warn("Service Worker registration failed:", error);
-        });
+        navigator.serviceWorker.register("./service-worker.js").catch((error) => { console.warn("Service Worker registration failed:", error); });
       });
     }
   </script>
-</body>
-</html>
+</body></html>

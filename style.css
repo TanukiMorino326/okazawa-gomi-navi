@@ -569,3 +569,53 @@ nav.bottom-nav button {
   min-width: 180px;
   text-align: center;
 }
+
+/* Sort: neutral surfaces; collection-category colors above remain untouched. */
+.sort-home-button { grid-column: 1 / -1; background: #171717; color: #fff; }
+nav.bottom-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bottom-nav button { min-width: 0; }
+.bottom-nav button.active { color: #fff; background: #171717; }
+.sort-nav-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+#sort-view { color: #171717; }
+#sort-view header { margin-bottom: 12px; }
+#sort-view h1 { font-size: 25px; line-height: 1.3; }
+#sort-view header p { color: #595959; line-height: 1.5; }
+#sort-view .sub-header > div { min-width: 0; }
+#sort-view .sort-language { display: flex; margin: 0 0 22px; gap: 12px; justify-content: flex-end; }
+#sort-view .sort-language button { min-height: 44px; padding: 8px; color: #595959; min-width: 0; }
+#sort-view .sort-language button.active { color: #171717; text-decoration: underline; background: transparent; }
+.sort-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.sort-category { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding: 18px 14px; min-height: 160px; min-width: 0; text-align: left; border: 1px solid #d6d6d6; border-radius: 16px; background: #fff; color: #171717; cursor: pointer; }
+.sort-category strong { display: block; padding-right: 10px; font-size: 16px; line-height: 1.4; }
+.sort-category small { display: block; margin-top: 6px; color: #595959; font-size: 12px; line-height: 1.55; }
+.sort-pictogram { display: inline-grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; }
+.sort-pictogram svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.sort-arrow { position: absolute; right: 12px; top: 16px; font-size: 24px; }
+.sort-special { grid-column: 1 / -1; min-height: 100px; flex-direction: row; align-items: center; background: #f4f4f4; }
+#sort-view :is(h2,h3,h4,p,li,strong,small,a) { overflow-wrap: anywhere; }
+.sort-detail-heading { display: flex; align-items: center; gap: 14px; margin: 18px 0 22px; }
+.sort-detail-heading h2 { margin: 0; font-size: 25px; line-height: 1.35; }
+.sort-back { min-height: 44px; padding: 10px 0; border: 0; background: transparent; color: #171717; font-size: 14px; cursor: pointer; text-align: left; }
+#sort-view :is(.sort-examples,.sort-section) { padding: 0 0 24px; margin: 0 0 24px; border-bottom: 1px solid #ddd; box-shadow: none; border-radius: 0; }
+#sort-view h3 { margin: 0 0 14px; font-size: 18px; line-height: 1.5; }
+#sort-view h4 { margin: 20px 0 8px; font-size: 15px; }
+#sort-view :is(p,li) { font-size: 15px; font-weight: 400; line-height: 1.75; }
+#sort-view ul, #sort-view ol { padding-left: 22px; margin: 8px 0; }
+#sort-view li + li { margin-top: 8px; }
+.sort-bag { border-left: 3px solid #171717; background: #f4f4f4; padding: 13px 14px; }
+.sort-bag span { display: block; color: #595959; font-size: 12px; margin-bottom: 5px; }
+.sort-bag strong { display: block; font-size: 16px; line-height: 1.55; }
+.sort-caution { margin-top: 20px; border: 1px solid #d6d6d6; border-radius: 12px; padding: 14px; }
+.sort-caution h4 { margin-top: 0 !important; }
+.sort-buy { margin: 24px 0; border-radius: 16px; background: #f4f4f4; padding: 18px; }
+.sort-buy h2 { font-size: 18px; margin: 0 0 10px; }
+.sort-buy small { display: block; color: #595959; line-height: 1.6; }
+.sort-link { display: block; color: #171717; min-height: 44px; padding: 12px 0; font-size: 13px; line-height: 1.5; text-underline-offset: 3px; }
+.sort-sources { display: flex; gap: 6px 16px; flex-wrap: wrap; }
+.sort-resources { margin-top: 12px; }
+.sort-footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #ddd; color: #595959; }
+#sort-view .sort-footer p { margin: 5px 0; font-size: 11px; line-height: 1.6; }
+:is(.sort-category,.sort-back,.sort-link,.sort-language button,.bottom-nav button):focus-visible { outline: 3px solid #171717; outline-offset: 3px; }
+.sort-category:hover { border-color: #171717; }
+@media (max-width: 340px) { .sort-grid { grid-template-columns: minmax(0, 1fr); } .sort-category { min-height: 110px; flex-direction: row; } }
+@media (prefers-reduced-motion: reduce) { .sort-category { transition: none; } }

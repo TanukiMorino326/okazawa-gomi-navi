@@ -1,13 +1,20 @@
-const CACHE_NAME = "okazawa-gomi-navi-v20";
+const CACHE_NAME = "okazawa-gomi-navi-v24-layout";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./style.css",
+  "./layout.css",
   "./app.js",
+  "./sort-data.js",
+  "./sort.js",
   "./schedule-2026.js",
   "./manifest.webmanifest",
-  "./icon-192.png",
-  "./icon-512.png"
+  "./icon-okazawa-v1-192.png",
+  "./icon-okazawa-v1-512.png",
+  "./icon-okazawa-v1-maskable-192.png",
+  "./icon-okazawa-v1-maskable-512.png",
+  "./favicon-okazawa-v1-32.png",
+  "./apple-touch-icon-okazawa-v1-180.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -18,7 +25,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+      Promise.all(keys.filter((key) => key.startsWith("okazawa-gomi-navi-") && key !== CACHE_NAME).map((key) => caches.delete(key)))
     )
   );
   self.clients.claim();
@@ -41,6 +48,21 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
+      .catch(async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const cached = await cache.match(event.request);
+        if (cached) return cached;
+
+        // Only the app's entry navigation may fall back to HTML. Returning it
+        // for missing scripts, images or data would hide the real load error.
+        const entry = new URL("./", self.location.href);
+        const index = new URL("./index.html", self.location.href);
+        if (event.request.mode === "navigate" &&
+            (url.pathname === entry.pathname || url.pathname === index.pathname)) {
+          const fallback = await cache.match(index.href);
+          if (fallback) return fallback;
+        }
+        return Response.error();
+      })
   );
 });
