@@ -1,0 +1,26 @@
+{
+  "name": "岡沢 ごみ出しナビ",
+  "short_name": "岡沢ごみナビ",
+  "description": "上越市中郷区C地区のごみ収集日を確認するWebアプリ",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f9f7",
+  "theme_color": "#2f7d4a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "commit": "fe326d689f0791ffbc579f21ecf5acab43c51ae8",
+  "files": {
+    "app.js": "a2269e09cc7fa599102c7ff781a386c7ed45dbf6e8f40063cc2c80a2bbc7c57b",
+    "index.html": "eed53a87e76311d2b5afde1c582e6f02df05b21666499471b10c574610f479c0",
+    "style.css": "e1493e99d241e424f9e8e109218c5cba7c7199d35c8afceae8d1a60ffe706f3e",
+    "schedule-2026.js": "b20ac9b4848ea248855d2473a8d04228cd9dbed3f68aba6e1fefcb273d96a104",
+    "manifest.webmanifest": "565dd60800c11beaa134047679a130021ac1e337e63bba2740d35e56a61992fb",
+    "push/onesignal/OneSignalSDKWorker.js": "2f213985d10e5c5117acfde4f0cab00ad2c13035577ef38c7f0d86d2dd722fbc",
+    "push/onesignal/OneSignalSDKUpdaterWorker.js": "2f213985d10e5c5117acfde4f0cab00ad2c13035577ef38c7f0d86d2dd722fbc"
+  }
+}
