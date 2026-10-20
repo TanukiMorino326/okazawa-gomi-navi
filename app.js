@@ -18,9 +18,9 @@ const UI = {
     homeTab: "今日", weekTab: "週間", calendarTab: "カレンダー",
     calendarButton: "カレンダー",
     weekTitle: "今週の予定",
-    previousWeek: "前週",
+    previousWeek: "先週",
     currentWeek: "今週",
-    nextWeek: "次週",
+    nextWeek: "来週",
     calendarTitle: "カレンダー",
     weatherTitle: "岡沢の天気",
     pushTitle: "㊕ 特別収集日の通知",
@@ -191,6 +191,9 @@ function mondayOfWeek(date) {
 }
 function renderWeek() {
   const t = UI[currentLang], now = tokyoNow(), start = addDays(mondayOfWeek(now), weekOffset * 7), end = addDays(start, 6);
+  const selectedWeekLabel = weekOffset < 0 ? t.previousWeek : (weekOffset > 0 ? t.nextWeek : t.currentWeek);
+  document.getElementById('current-week').textContent = selectedWeekLabel;
+  document.querySelector('#week-view .view-header h2').textContent = currentLang === 'ja' ? `${selectedWeekLabel}の予定` : selectedWeekLabel;
   document.getElementById('week-range').textContent = `${formatDate(start, true)} — ${formatDate(end)}`;
   document.getElementById('prev-week').disabled = weekOffset <= -1;
   document.getElementById('next-week').disabled = weekOffset >= 1;
