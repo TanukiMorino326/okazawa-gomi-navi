@@ -40,7 +40,7 @@ const UI = {
     sourceNote: "実際の収集日は年度カレンダーを優先",
     outOfPeriod: "収集データ対象期間外です（2026年4月1日～2027年3月31日）",
     none: "収集なし",
-    noFurther: "年度内の次回収集情報はありません",
+    noFurther: "登録済みの次回収集情報はありません",
     weekdays: ["月", "火", "水", "木", "金", "土", "日"],
     short: { burnable: "燃・生", packaging: "容器", nonburnable: "不燃", cans: "缶びん", paper: "古紙" }
   },
@@ -77,7 +77,7 @@ const UI = {
     sourceNote: "Official fiscal-year collection calendar takes priority.",
     outOfPeriod: "Collection data is available for Apr 1, 2026 – Mar 31, 2027.",
     none: "No collection",
-    noFurther: "No further collection data in this fiscal year",
+    noFurther: "No further collection data is available",
     weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     short: { burnable: "Burn.", packaging: "Pkg.", nonburnable: "Non-b.", cans: "Cans", paper: "Paper" }
   }
@@ -109,8 +109,22 @@ Object.assign(UI.en, {
 });
 const SPECIAL_COLLECTION = { ja: '乾電池等／蛍光灯・電球', en: 'Batteries, fluorescent lamps & light bulbs' };
 const APP_TIME_ZONE = 'Asia/Tokyo';
-const SCHEDULE_START = '2026-04-01';
-const SCHEDULE_END = '2027-03-31';
+// Register only official, verified fiscal-year data here.
+// To add 2027: load schedule-2027.js before app.js and add its entry below.
+// Never generate future collection dates from weekday patterns.
+const SCHEDULE_PERIODS = [
+  { start: '2026-04-01', end: '2027-03-31', collections: SCHEDULE_2026, special: SPECIAL_COLLECTION_2026 }
+];
+function schedulePeriodFor(key) {
+  return SCHEDULE_PERIODS.find(period => key >= period.start && key <= period.end) || null;
+}
+function hasScheduleInRange(startKey, endKey) {
+  return SCHEDULE_PERIODS.some(period => period.start <= endKey && period.end >= startKey);
+}
+const SCHEDULE_START = SCHEDULE_PERIODS[0].start;
+const SCHEDULE_END = SCHEDULE_PERIODS[SCHEDULE_PERIODS.length - 1].end;
+UI.ja.outOfPeriod = `収集データ対象期間外です（${SCHEDULE_PERIODS.map(p => `${p.start.replace(/(\\d{4})-(\\d{2})-(\\d{2})/, (_,y,m,d) => `${y}年${+m}月${+d}日`)}～${p.end.replace(/(\\d{4})-(\\d{2})-(\\d{2})/, (_,y,m,d) => `${y}年${+m}月${+d}日`)}`).join('、')}）`;
+UI.en.outOfPeriod = `Collection data available for: ${SCHEDULE_PERIODS.map(p => `${p.start} – ${p.end}`).join(', ')}.`;
 let currentLang = 'ja';
 try { const saved = localStorage.getItem('okazawa-gomi-lang'); if (saved === 'ja' || saved === 'en') currentLang = saved; } catch (_) { /* Storage can be unavailable; the switch still works in this session. */ }
 let weekOffset = 0;
@@ -131,9 +145,15 @@ function addDays(date, days) { const next = new Date(date); next.setUTCDate(next
 function monthStart(date) { return civilDate(date.getUTCFullYear(), date.getUTCMonth()); }
 let calendarCursor = monthStart(tokyoNow());
 let calendarSelectedKey = dateKey(tokyoNow());
-function isWithinSchedulePeriod(date) { const key = dateKey(date); return key >= SCHEDULE_START && key <= SCHEDULE_END; }
-function collectionTypeFor(date) { return SCHEDULE_2026[dateKey(date)] || null; }
-function hasSpecialCollection(date) { return SPECIAL_COLLECTION_2026.has(dateKey(date)); }
+function isWithinSchedulePeriod(date) { return Boolean(schedulePeriodFor(dateKey(date))); }
+function collectionTypeFor(date) {
+  const key = dateKey(date), period = schedulePeriodFor(key);
+  return period ? period.collections[key] || null : null;
+}
+function hasSpecialCollection(date) {
+  const key = dateKey(date), period = schedulePeriodFor(key);
+  return period ? period.special.has(key) : false;
+}
 function collectionFor(date) { const type = collectionTypeFor(date); return type ? COLLECTIONS[type] : null; }
 function nextCollectionAfter(date) {
   for (let i = 1; i <= 370; i++) { const next = addDays(date, i), collection = collectionFor(next); if (collection || hasSpecialCollection(next)) return { date: next, collection, type: collectionTypeFor(next) }; }
@@ -220,7 +240,7 @@ function renderCalendar() {
   document.getElementById('calendar-month').textContent = new Intl.DateTimeFormat(currentLang === 'en' ? 'en-US' : 'ja-JP',{year:'numeric',month:'long',timeZone:'UTC'}).format(first);
   document.querySelector('.calendar-weekdays').innerHTML = t.weekdays.map((day,i) => `<span aria-label="${day}"><span class="weekday-full">${day}</span><span class="weekday-narrow" aria-hidden="true">${currentLang === 'en' ? ['M','T','W','T','F','S','S'][i] : day}</span></span>`).join('');
   const note = document.getElementById('calendar-period-note');
-  note.hidden = dateKey(last) >= SCHEDULE_START && dateKey(first) <= SCHEDULE_END; note.textContent = t.outOfPeriod;
+  note.hidden = hasScheduleInRange(dateKey(first), dateKey(last)); note.textContent = t.outOfPeriod;
   const cells = Array.from({length:leading},()=>'<div class="date-cell blank" aria-hidden="true"></div>');
   for (let day=1; day<=last.getUTCDate(); day++) {
     const date = civilDate(year,month,day), key=dateKey(date), inPeriod=isWithinSchedulePeriod(date), type=collectionTypeFor(date), special=hasSpecialCollection(date), today=key===dateKey(now), selected=key===calendarSelectedKey;
