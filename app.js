@@ -123,7 +123,8 @@ function hasScheduleInRange(startKey, endKey) {
 }
 const SCHEDULE_START = SCHEDULE_PERIODS[0].start;
 const SCHEDULE_END = SCHEDULE_PERIODS[SCHEDULE_PERIODS.length - 1].end;
-UI.ja.outOfPeriod = `収集データ対象期間外です（${SCHEDULE_PERIODS.map(p => `${p.start.replace(/(\\d{4})-(\\d{2})-(\\d{2})/, (_,y,m,d) => `${y}年${+m}月${+d}日`)}～${p.end.replace(/(\\d{4})-(\\d{2})-(\\d{2})/, (_,y,m,d) => `${y}年${+m}月${+d}日`)}`).join('、')}）`;
+const formatJapaneseScheduleDate = key => `${key.slice(0, 4)}年${Number(key.slice(5, 7))}月${Number(key.slice(8, 10))}日`;
+UI.ja.outOfPeriod = `収集データ対象期間外です（${SCHEDULE_PERIODS.map(p => `${formatJapaneseScheduleDate(p.start)}～${formatJapaneseScheduleDate(p.end)}`).join('、')}）`;
 UI.en.outOfPeriod = `Collection data available for: ${SCHEDULE_PERIODS.map(p => `${p.start} – ${p.end}`).join(', ')}.`;
 let currentLang = 'ja';
 try { const saved = localStorage.getItem('okazawa-gomi-lang'); if (saved === 'ja' || saved === 'en') currentLang = saved; } catch (_) { /* Storage can be unavailable; the switch still works in this session. */ }
