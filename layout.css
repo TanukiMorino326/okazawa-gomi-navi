@@ -37,3 +37,12 @@ html[lang="en"] nav.bottom-nav{padding-inline:6px}html[lang="en"] nav.bottom-nav
 .sort-search-result strong,.sort-search-result span { display:block; }
 .sort-search-result span { font-size:14px; margin-top:6px; line-height:1.6; }
 .sort-search :focus-visible { outline:3px solid #171717; outline-offset:2px; }
+
+.sort-search-result .sort-search-label{font-size:.875rem;line-height:1.5}
+.sort-search-result .sort-search-location{font-size:.75rem;color:#555;margin-top:5px}
+.sort-search-result small{display:block;margin-top:8px;font-size:.75rem;line-height:1.5}
+.sort-search-caution{border-inline-start:4px solid #777;background:#f6f6f5}
+.sort-search-related{border-style:dashed}
+.sort-search-row{flex-wrap:wrap}
+.sort-search-row input{flex-basis:180px}
+.sort-section h3{scroll-margin-top:16px}
