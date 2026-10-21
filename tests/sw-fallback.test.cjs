@@ -36,7 +36,7 @@ for (const resource of ['missing.js', 'missing.css', 'missing.json', 'missing.pn
     assert.equal(response.type, 'error');
     assert.equal(response.status, 0);
     assert.equal(await response.text(), '');
-    assert(w.opened.every(name => name === 'okazawa-gomi-navi-v26-search-context'));
+    assert(w.opened.every(name => name === 'okazawa-gomi-navi-v27-favorites'));
   });
 }
 for (const path of ['', 'index.html?lang=en']) {

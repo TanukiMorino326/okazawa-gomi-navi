@@ -46,3 +46,12 @@ html[lang="en"] nav.bottom-nav{padding-inline:6px}html[lang="en"] nav.bottom-nav
 .sort-search-row{flex-wrap:wrap}
 .sort-search-row input{flex-basis:180px}
 .sort-section h3{scroll-margin-top:16px}
+
+/* Saved guidance uses the spare cell before Special Disposal. */
+.sort-favorites-card .sort-pictogram{font-size:2rem;line-height:1}
+.sort-saved-row{margin:10px 0 16px;min-width:0}
+.sort-saved-row .sort-search-result{margin-bottom:6px}
+.sort-save{min-height:44px;padding:8px 12px;border:1px solid #777;border-radius:8px;background:#fff;color:#171717;font:inherit;font-size:.875rem;line-height:1.5;overflow-wrap:anywhere;max-width:100%}
+.sort-save:disabled{color:#555;background:#f4f4f3;border-color:#bbb}
+.sort-section>.sort-save{margin:0 0 12px}
+#sort-favorite-status:empty{display:none}
