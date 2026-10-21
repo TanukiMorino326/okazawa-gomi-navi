@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 require('node:child_process').execFileSync(process.execPath,[path.resolve(__dirname,'../tools/build-review-preview.cjs')]);
-const preview=path.resolve(__dirname,'../../OkazawaGomi_v04_実画面プレビュー'),web=path.join(preview,'web');
+const preview=path.resolve(__dirname,'../../OkazawaGomi_品目検索_実画面プレビュー'),web=path.join(preview,'web');
 const read=f=>fs.readFileSync(path.join(web,f),'utf8');
 const {handle}=require(path.join(preview,'server.cjs'));
 function request(url,method='GET'){let result={};handle({url,method},{writeHead(code,headers){result={code,headers}},end(body){result.body=body}});return result;}

@@ -3,6 +3,34 @@ const SORT_UI = {
   en: { title: 'Sorting Guide', intro: 'What goes where, how to set it out, and which bag to use', examples: 'Common examples', bag: 'Bag & collection point', steps: 'How to set it out', caution: 'Important', back: 'All categories', sample: 'View designated bag examples', buy: 'Where to buy bags', storeNote: 'Examples of participating stores. Ask the store about bag types and stock.', source: 'Official guide', page: 'page', note: 'Based on Joetsu City’s April 2026 guide. English is an app translation.', checked: 'Checked', external: 'External Japanese page • Internet required', battery: 'Official battery guidance & city contact', dictionary: 'Look up more items (Gomisaku, Japanese)', city: 'Joetsu City’s official guide', unavailable: 'The sorting guide could not load. Reopen the app online.' }
 };
 let selectedSortCategory = null;
+let sortSearchQuery = '';
+const SORT_SEARCH_UI = {
+  ja: {label:'品目名で案内を探す', placeholder:'例：スプレー缶、電池', clear:'消去', note:'登録済みの説明を検索します。除外品の記載も含むため、分別先は詳細の注意事項で確認してください。', results:'関連する案内', empty:'該当する案内がありません。別の名前で検索するか、下の「ごみサク」で確認してください。'},
+  en: {label:'Find guidance by item', placeholder:'e.g. aerosol, battery', clear:'Clear', note:'Searches existing guidance, including exclusions. Check the detailed instructions before deciding how to dispose of an item.', results:'Related guidance', empty:'No guidance found. Try another name or use the Gomisaku link below (Japanese).'}
+};
+function normalizeSortSearch(value) {
+  return String(value).normalize('NFKC').toLowerCase().replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0)-0x60)).replace(/\s+/g,' ').trim();
+}
+// Return references to existing text, never infer disposal categories from a mention.
+function searchSortGuides(query, lang = currentLang) {
+  const terms = normalizeSortSearch(query).split(' ').filter(Boolean);
+  if (!terms.length || typeof SORT_GUIDE === 'undefined') return [];
+  return SORT_GUIDE.categories.flatMap(category => {
+    const passages = [category.title[lang], category.subtitle[lang], ...category.examples[lang],
+      ...category.sections.flatMap(s => [s.title[lang], ...s.steps[lang], ...s.cautions[lang]])];
+    const matches = passages.filter(p => terms.every(term => normalizeSortSearch(p).includes(term)));
+    return matches.length ? [{category, matches}] : [];
+  });
+}
+function renderSortSearchResults() {
+  const node = document.getElementById('sort-search-results');
+  if (!node) return;
+  const ui = SORT_SEARCH_UI[currentLang];
+  if (!normalizeSortSearch(sortSearchQuery)) { node.innerHTML = ''; return; }
+  const results = searchSortGuides(sortSearchQuery);
+  node.innerHTML = results.length ? '<p>'+ui.results+' · '+results.length+'</p>'+results.map(({category, matches}) =>
+    '<button type="button" class="sort-search-result" data-sort-category="'+category.id+'"><strong>'+sortEscape(category.title[currentLang])+'</strong><span>'+sortEscape(matches[0])+'</span></button>').join('') : '<p>'+ui.empty+'</p>';
+}
 
 function sortIcon(id) {
   const paths = {
@@ -33,6 +61,7 @@ function renderSort() {
     content.innerHTML = `<p role="status">${ui.unavailable}</p>`;
     return;
   }
+  const searchUi = SORT_SEARCH_UI[currentLang];
   const t = value => value[currentLang];
   const list = (items, ordered = false) => `<${ordered ? 'ol' : 'ul'}>${items.map(item => `<li>${sortEscape(item)}</li>`).join('')}</${ordered ? 'ol' : 'ul'}>`;
   const external = (url, label, className = 'sort-link') => `<a class="${className}" href="${sortEscape(url)}" target="_blank" rel="noopener noreferrer">${sortEscape(label)}<span aria-hidden="true"> ↗</span></a>`;
@@ -40,7 +69,7 @@ function renderSort() {
   const category = SORT_GUIDE.categories.find(c => c.id === selectedSortCategory);
   if (!category) {
     selectedSortCategory = null;
-    content.innerHTML = `<div class="sort-grid">${SORT_GUIDE.categories.map(c => `<button type="button" class="sort-category${c.id === 'special' ? ' sort-special' : ''}" data-sort-category="${c.id}"><span class="sort-pictogram">${sortIcon(c.icon)}</span><span><strong>${sortEscape(t(c.title))}</strong><small>${sortEscape(t(c.subtitle))}</small></span><span class="sort-arrow" aria-hidden="true">›</span></button>`).join('')}</div>
+    content.innerHTML = `<div class="sort-search" role="search"><label for="sort-search-input">${searchUi.label}</label><div class="sort-search-row"><input id="sort-search-input" type="search" maxlength="100" enterkeyhint="search" autocomplete="off" aria-describedby="sort-search-note" placeholder="${searchUi.placeholder}" value="${sortEscape(sortSearchQuery)}"><button type="button" data-sort-search-clear>${searchUi.clear}</button></div><p id="sort-search-note">${searchUi.note}</p><div id="sort-search-results" role="status" aria-live="polite" aria-atomic="true"></div></div><div class="sort-grid">${SORT_GUIDE.categories.map(c => `<button type="button" class="sort-category${c.id === 'special' ? ' sort-special' : ''}" data-sort-category="${c.id}"><span class="sort-pictogram">${sortIcon(c.icon)}</span><span><strong>${sortEscape(t(c.title))}</strong><small>${sortEscape(t(c.subtitle))}</small></span><span class="sort-arrow" aria-hidden="true">›</span></button>`).join('')}</div>
       <aside class="sort-buy"><h2>${ui.buy}</h2><p>${sortEscape(t(SORT_GUIDE.purchase))}</p><small>${ui.storeNote}</small></aside>
       <div class="sort-resources">${external(SORT_GUIDE.cityGuide, ui.city)}${external('https://www.gomisaku.jp/0152/?lang=ja', ui.dictionary)}</div>${footer}`;
     return;
@@ -55,6 +84,13 @@ function renderSort() {
 }
 
 document.getElementById('sort-content')?.addEventListener('click', event => {
+  if (event.target.closest('[data-sort-search-clear]')) {
+    sortSearchQuery = '';
+    const input = document.getElementById('sort-search-input');
+    if (input) { input.value = ''; input.focus(); }
+    renderSortSearchResults();
+    return;
+  }
   const card = event.target.closest('[data-sort-category]');
   if (card) {
     selectedSortCategory = card.dataset.sortCategory;
@@ -67,4 +103,15 @@ document.getElementById('sort-content')?.addEventListener('click', event => {
     renderSort();
     document.querySelector(`[data-sort-category="${previous}"]`)?.focus();
   }
+});
+
+document.getElementById('sort-content')?.addEventListener('input', event => {
+  if (event.target.id !== 'sort-search-input' || event.isComposing) return;
+  sortSearchQuery = event.target.value.slice(0,100);
+  renderSortSearchResults();
+});
+document.getElementById('sort-content')?.addEventListener('compositionend', event => {
+  if (event.target.id !== 'sort-search-input') return;
+  sortSearchQuery = event.target.value.slice(0,100);
+  renderSortSearchResults();
 });

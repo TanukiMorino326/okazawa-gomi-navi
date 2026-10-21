@@ -25,3 +25,15 @@ nav.bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:9px
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 #home-view .next-card{border:0;border-bottom:1px solid #e5e5e5}.weather-source{color:#626262;opacity:1}.weather-left span,.week-date>span{overflow-wrap:anywhere}
 html[lang="en"] nav.bottom-nav{padding-inline:6px}html[lang="en"] nav.bottom-nav button{padding-inline:1px}html[lang="en"] .bottom-nav button>span{white-space:nowrap;overflow-wrap:normal}
+
+/* Local guide search */
+.sort-search { margin-bottom:20px; }
+.sort-search label { display:block; font-weight:700; margin-bottom:8px; }
+.sort-search-row { display:flex; gap:8px; }
+.sort-search-row input { flex:1; min-width:0; width:100%; font:inherit; font-size:16px; padding:10px; border:1px solid #777; border-radius:8px; }
+.sort-search-row button { flex-shrink:0; min-height:44px; padding:8px 12px; font:inherit; border:1px solid #777; border-radius:8px; background:#fff; color:#171717; }
+.sort-search p { font-size:13px; line-height:1.6; }
+.sort-search-result { display:block; width:100%; text-align:left; padding:12px; margin:8px 0; border:1px solid #aaa; border-radius:8px; background:#fff; color:#171717; font:inherit; overflow-wrap:anywhere; }
+.sort-search-result strong,.sort-search-result span { display:block; }
+.sort-search-result span { font-size:14px; margin-top:6px; line-height:1.6; }
+.sort-search :focus-visible { outline:3px solid #171717; outline-offset:2px; }
